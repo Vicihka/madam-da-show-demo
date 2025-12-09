@@ -1,0 +1,16 @@
+{% extends "admin/change_list.html" %}
+
+{% block object-tools-items %}
+    {{ block.super }}
+    <li>
+        <a href="{% url 'admin:app_order_sales_report' %}" class="addlink" style="background: #417690; padding: 10px 15px; border-radius: 4px;">
+            📊 Sales Report
+        </a>
+    </li>
+    <li>
+        <a href="{% url 'admin:app_order_commission_report' %}" class="addlink" style="background: #28a745; padding: 10px 15px; border-radius: 4px;">
+            💰 Commission Report
+        </a>
+    </li>
+{% endblock %}
+

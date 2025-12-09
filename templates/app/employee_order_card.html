@@ -1,0 +1,145 @@
+<div class="order-card" data-order="{{ order.order_number }}" data-customer-name="{{ order.customer_name|lower }}" data-customer-phone="{{ order.customer_phone|lower }}" data-payment-method="{{ order.payment_method }}" data-payment-received="{% if order.payment_received %}true{% else %}false{% endif %}" data-total="{{ order.total }}" data-created-at="{{ order.created_at|date:'c' }}">
+    <input type="checkbox" class="order-checkbox" data-order="{{ order.order_number }}" onchange="window.updateBulkActions()">
+    <button class="quick-actions-btn" onclick="window.showQuickActions(event, '{{ order.order_number }}')" title="Quick Actions">⋯</button>
+    <div class="order-header">
+        <div>
+            <div class="order-number">#{{ order.order_number }}</div>
+            <div class="time-ago" data-time="{{ order.created_at|date:'c' }}"></div>
+        </div>
+        <span class="order-status status-{{ order.status }}">{{ order.get_status_display }}</span>
+    </div>
+    
+    <div class="order-info">
+        <div class="info-item">
+            <span class="info-label">Customer</span>
+            <span class="info-value">{{ order.customer_name }}</span>
+        </div>
+        <div class="info-item info-item-phone">
+            <span class="info-label">Phone</span>
+            <span class="info-value">{{ order.customer_phone }}</span>
+        </div>
+        {% if order.customer_address %}
+        <div class="info-item info-item-address">
+            <span class="info-label">Address</span>
+            <span class="info-value">{{ order.customer_address }}</span>
+        </div>
+        {% endif %}
+        {% if order.customer_province %}
+        <div class="info-item">
+            <span class="info-label">Province</span>
+            <span class="info-value">{{ order.customer_province }}</span>
+        </div>
+        {% endif %}
+        <div class="info-item">
+            <span class="info-label">Total</span>
+            <span class="info-value">${{ order.total }}</span>
+        </div>
+        <div class="info-item">
+            <span class="info-label">Payment</span>
+            <span class="info-value">{{ order.payment_method }}</span>
+        </div>
+        <div class="info-item">
+            <span class="info-label">Customer Received</span>
+            <span class="info-value">
+                {% if order.customer_received %}
+                    <span style="color: #28a745; font-weight: 600; font-size: 16px;">✅ Received</span>
+                    {% if order.customer_received_at %}
+                        <div style="font-size: 11px; color: #666; margin-top: 2px;">
+                            {{ order.customer_received_at|date:"M d, H:i" }}
+                        </div>
+                        {% if order.customer_received_by %}
+                            <div style="font-size: 10px; color: #999; margin-top: 1px;">
+                                by {{ order.customer_received_by }}
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                {% else %}
+                    <span style="color: #dc3545; font-weight: 600; font-size: 16px;">Not Received</span>
+                {% endif %}
+            </span>
+        </div>
+        {% if order.payment_method == 'Cash on Delivery' %}
+        <div class="info-item">
+            <span class="info-label">Payment Status</span>
+            <span class="info-value">
+                {% if order.payment_received %}
+                    <span style="color: #28a745; font-weight: 600; font-size: 16px;">✅ Paid</span>
+                    {% if order.payment_received_at %}
+                        <div style="font-size: 11px; color: #666; margin-top: 2px;">
+                            {{ order.payment_received_at|date:"M d, H:i" }}
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <span style="color: #dc3545; font-weight: 600; font-size: 16px;">⏳ Not Paid</span>
+                {% endif %}
+            </span>
+        </div>
+        {% endif %}
+    </div>
+    
+    {% if show_items %}
+    <div class="order-items">
+        <div class="order-items-title">📦 Products to Prepare:</div>
+        <ul class="item-list">
+            {% for item in order.items.all %}
+            <li>
+                <span class="item-name">{{ item.product_name }}</span>
+                <span class="item-qty">x{{ item.quantity }}</span>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+    
+    <div class="order-actions">
+        {% if order.status == 'pending' or order.status == 'confirmed' %}
+            <button onclick="window.updateStatus('{{ order.order_number }}', 'preparing')" class="btn btn-info">👷 Start Preparing</button>
+        {% endif %}
+        
+        {% if order.status == 'preparing' %}
+            {% if order.payment_method == 'Cash on Delivery' %}
+                <a href="{% url 'employee_print_qr' order.order_number %}" target="_blank" class="btn btn-print">🖨️ Print QR</a>
+            {% endif %}
+            <button onclick="window.updateStatus('{{ order.order_number }}', 'ready_for_delivery')" class="btn btn-success">✅ Mark Ready</button>
+        {% endif %}
+        
+        {% if order.status == 'ready_for_delivery' %}
+            <button onclick="window.updateStatus('{{ order.order_number }}', 'out_for_delivery')" class="btn btn-warning">🚚 Out for Delivery</button>
+        {% endif %}
+        
+        {% if order.status == 'out_for_delivery' %}
+            {% if order.payment_method == 'Cash on Delivery' and not order.payment_received %}
+                <button onclick="window.confirmPayment('{{ order.order_number }}')" class="btn btn-primary" style="background: #ffc107; color: #333; font-weight: 700; border: 2px solid #ff9800;">💰 Confirm Payment (${{ order.total }})</button>
+            {% endif %}
+            <button onclick="window.updateStatus('{{ order.order_number }}', 'delivered')" class="btn btn-success">✅ Delivered</button>
+        {% endif %}
+        
+        {% if order.status == 'delivered' and order.payment_method == 'Cash on Delivery' and not order.payment_received %}
+            <button onclick="window.confirmPayment('{{ order.order_number }}')" class="btn btn-primary" style="background: #ffc107; color: #333; font-weight: 700; border: 2px solid #ff9800;">💰 Confirm Payment (${{ order.total }})</button>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    // Update time ago for each order
+    document.querySelectorAll('.time-ago').forEach(el => {
+        const timeStr = el.getAttribute('data-time');
+        if (timeStr) {
+            const time = new Date(timeStr);
+            const now = new Date();
+            const diff = Math.floor((now - time) / 1000 / 60); // minutes
+            
+            if (diff < 1) {
+                el.textContent = 'Just now';
+            } else if (diff < 60) {
+                el.textContent = `${diff} min ago`;
+            } else if (diff < 1440) {
+                const hours = Math.floor(diff / 60);
+                el.textContent = `${hours} hour${hours > 1 ? 's' : ''} ago`;
+            } else {
+                const days = Math.floor(diff / 1440);
+                el.textContent = `${days} day${days > 1 ? 's' : ''} ago`;
+            }
+        }
+    });
+</script>

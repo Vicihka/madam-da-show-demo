@@ -1,0 +1,79 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MADAM DA | Shipping Policy</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
+    <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.png' %}">
+    <link rel="apple-touch-icon" href="{% static 'images/favicon.png' %}">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: 24 119 242;
+            --text: 17 24 39;
+            --text-light: 107 114 128;
+            --bg: #fafafa;
+            --bg-card: #ffffff;
+            --border: #e5e7eb;
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+            --font-main: 'Inter', sans-serif;
+            --font-display: 'Playfair Display', serif;
+            --radius-md: 12px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: var(--font-main); background: var(--bg); color: var(--text); line-height: 1.7; }
+        header { position: sticky; top: 0; background: white; border-bottom: 1px solid var(--border); z-index: 100; }
+        .header-inner { max-width: 1400px; margin: 0 auto; padding: 0 24px; height: 72px; display: flex; align-items: center; }
+        .logo { display: flex; align-items: center; gap: 12px; cursor: pointer; }
+        .logo h1 { font-family: var(--font-display); font-size: 24px; font-weight: 700; color: rgb(var(--primary)); }
+        .container { max-width: 900px; margin: 0 auto; padding: 60px 24px; }
+        .page-header { text-align: center; margin-bottom: 40px; }
+        .page-header h1 { font-family: var(--font-display); font-size: clamp(36px, 5vw, 48px); margin-bottom: 16px; }
+        .content-section { background: var(--bg-card); padding: 40px; border-radius: var(--radius-md); box-shadow: var(--shadow-md); margin-bottom: 32px; }
+        .content-section h2 { font-family: var(--font-display); font-size: 28px; margin-bottom: 20px; }
+        .content-section p { margin-bottom: 16px; line-height: 1.8; }
+        .content-section ul { margin-left: 24px; margin-bottom: 16px; }
+        .content-section li { margin-bottom: 8px; }
+        .btn-back { display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; background: rgb(var(--primary)); color: white; border-radius: 8px; text-decoration: none; font-weight: 600; margin-top: 40px; }
+        @media (max-width: 768px) { .container { padding: 40px 20px; } .content-section { padding: 24px; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-inner">
+            <div class="logo" onclick="window.location.href='{% url 'shop' %}'">
+                <h1>MADAM DA</h1>
+            </div>
+        </div>
+    </header>
+    <div class="container">
+        <div class="page-header">
+            <h1>Shipping Policy</h1>
+            <p>Fast and reliable delivery across Cambodia</p>
+        </div>
+        <div class="content-section">
+            <h2>Delivery Information</h2>
+            <p>We offer fast and reliable shipping services across Cambodia through J&T Express and other trusted courier partners.</p>
+            <h2 style="margin-top: 32px;">Shipping Options</h2>
+            <ul>
+                <li>Standard Shipping: 3-5 business days</li>
+                <li>Express Shipping: 1-2 business days (available in major cities)</li>
+            </ul>
+            <h2 style="margin-top: 32px;">Shipping Costs</h2>
+            <p>Shipping costs are calculated based on your location and order weight. You will see the exact shipping cost during checkout.</p>
+            <h2 style="margin-top: 32px;">Order Processing</h2>
+            <p>Orders are typically processed within 1-2 business days. You will receive a tracking number once your order has been shipped.</p>
+            <h2 style="margin-top: 32px;">Contact</h2>
+            <p>For shipping inquiries, please contact us via <a href="{% url 'contact' %}" style="color: rgb(var(--primary));">Telegram</a>.</p>
+        </div>
+        <a href="{% url 'shop' %}" class="btn-back">← Back to Shop</a>
+    </div>
+</body>
+</html>
+
+

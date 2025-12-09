@@ -1,0 +1,718 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="MADAM DA - Order Confirmed">
+    <title>MADAM DA | Order Confirmed</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
+    <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.png' %}">
+    <link rel="apple-touch-icon" href="{% static 'images/favicon.png' %}">
+    
+    <!-- Preload critical resources -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    
+    <!-- Fonts with optimized loading -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet">
+    
+    <style>
+        /* ========== CSS VARIABLES ========== */
+        :root {
+            --primary: 24 119 242; /* Premium blue #1877f2 */
+            --primary-foreground: 255 255 255;
+            --primary-light: 66 165 245; /* Lighter blue #42a5f5 */
+            --accent: 24 119 242; /* Primary accent */
+            --accent-dark: 22 111 229; /* Darker accent */
+            --text: 17 24 39; /* Rich dark text #111827 */
+            --text-light: 107 114 128; /* Medium gray #6b7280 */
+            --text-lighter: 156 163 175; /* Light gray #9ca3af */
+            --bg: #fafafa; /* Soft off-white */
+            --bg-gray: #f3f4f6; /* Light gray background */
+            --bg-card: #ffffff; /* Card background */
+            --border: #e5e7eb; /* Subtle border */
+            --border-light: #f3f4f6; /* Very light border */
+            --success: #10b981;
+            --danger: #ef4444;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+            --font-main: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            --font-display: 'Playfair Display', Georgia, serif;
+            --radius: 8px;
+            --radius-md: 12px;
+            --radius-lg: 20px;
+            --radius-xl: 24px;
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-slow: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
+            letter-spacing: -0.01em;
+        }
+        
+        img {
+            max-width: 100%;
+            display: block;
+        }
+        
+        button {
+            font-family: var(--font-main);
+            cursor: pointer;
+            border: none;
+            outline: none;
+            transition: var(--transition);
+        }
+        
+        a {
+            text-decoration: none;
+            color: inherit;
+            transition: var(--transition);
+        }
+        
+        h1, h2, h3, h4 {
+            font-family: var(--font-display);
+            font-weight: 700;
+            color: var(--text);
+            line-height: 1.2;
+        }
+        
+        .hidden { display: none !important; }
+
+        /* ========== HEADER ========== */
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border-bottom: 1px solid var(--border);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            transition: var(--transition);
+        }
+
+        .header-inner {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 24px;
+            height: 72px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            margin: 0 auto;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .logo:hover { opacity: 0.8; }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(24, 119, 242, 0.25);
+            transition: var(--transition);
+            overflow: hidden;
+            background: transparent;
+        }
+
+        .logo-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
+        .logo:hover .logo-icon {
+            transform: scale(1.05);
+            box-shadow: 0 6px 16px rgba(24, 119, 242, 0.35);
+        }
+
+        .logo h1 {
+            font-size: 26px;
+            font-weight: 800;
+            letter-spacing: -0.8px;
+            background: linear-gradient(135deg, rgb(var(--primary)) 0%, rgb(var(--primary-light)) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* ========== SUCCESS PAGE ========== */
+        .success-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 48px 24px;
+        }
+
+        .success-header {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+
+        .success-icon {
+            width: 140px;
+            height: 140px;
+            margin: 0 auto 32px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 12px 32px rgba(16, 185, 129, 0.4), 0 4px 12px rgba(16, 185, 129, 0.2);
+            animation: scaleIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+        }
+        
+        .success-icon::before {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(5, 150, 105, 0.1) 100%);
+            z-index: -1;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes scaleIn {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 0.6;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 0.3;
+            }
+        }
+        
+
+        .success-icon svg {
+            width: 72px;
+            height: 72px;
+            color: white;
+            stroke-width: 3;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+        }
+        
+        @media (max-width: 768px) {
+            .success-icon {
+                width: 110px;
+                height: 110px;
+                margin: 0 auto 24px;
+            }
+            
+            .success-icon svg {
+                width: 56px;
+                height: 56px;
+            }
+        }
+
+        .success-title {
+            font-size: 42px;
+            font-weight: 800;
+            margin-bottom: 12px;
+            color: var(--text);
+            font-family: var(--font-display);
+        }
+
+        .success-subtitle {
+            font-size: 18px;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+
+        /* ========== ORDER INFO CARD ========== */
+        .info-card {
+            background: var(--bg-card);
+            border-radius: var(--radius-xl);
+            padding: 32px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border);
+        }
+
+        .info-card-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .info-card-title svg {
+            width: 24px;
+            height: 24px;
+            color: rgb(var(--primary));
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .info-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .info-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .order-number {
+            font-size: 28px;
+            font-weight: 800;
+            color: rgb(var(--primary));
+            font-family: var(--font-display);
+        }
+
+        /* ========== CUSTOMER INFO ========== */
+        .customer-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        /* ========== ORDER SUMMARY ========== */
+        .order-items {
+            margin-bottom: 24px;
+        }
+
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            border-bottom: 1px dashed var(--border);
+        }
+
+        .order-item:last-child {
+            border-bottom: none;
+        }
+
+        .order-item-name {
+            font-weight: 600;
+            color: var(--text);
+            flex: 1;
+        }
+
+        .order-item-qty {
+            color: var(--text-light);
+            margin: 0 12px;
+        }
+
+        .order-item-price {
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .order-totals {
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 2px solid var(--border);
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .total-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .total-label {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .total-amount {
+            font-size: 24px;
+            font-weight: 800;
+            color: rgb(var(--primary));
+            font-family: var(--font-display);
+        }
+
+        .total-row.final .total-label {
+            font-size: 20px;
+        }
+
+        /* ========== PAYMENT METHOD ========== */
+        .payment-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(24, 119, 242, 0.1);
+            color: rgb(var(--primary));
+            padding: 10px 16px;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .payment-badge svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .payment-badge .khqr-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            aspect-ratio: 1;
+            object-fit: contain;
+            background: #E1232E;
+            padding: 4px;
+        }
+
+        /* ========== DELIVERY MESSAGE ========== */
+        .delivery-message {
+            background: linear-gradient(135deg, rgba(24, 119, 242, 0.05) 0%, rgba(66, 153, 255, 0.05) 100%);
+            border-left: 4px solid rgb(var(--primary));
+            padding: 20px 24px;
+            border-radius: var(--radius-md);
+            margin-top: 24px;
+        }
+
+        .delivery-message p {
+            margin-bottom: 8px;
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        .delivery-message p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* ========== ACTION BUTTONS ========== */
+        .action-buttons {
+            display: flex;
+            gap: 16px;
+            margin-top: 48px;
+            flex-wrap: wrap;
+        }
+
+
+        .btn-primary {
+            flex: 1;
+            min-width: 200px;
+            padding: 16px 32px;
+            background: linear-gradient(135deg, rgb(var(--primary)) 0%, rgb(var(--primary-light)) 100%);
+            color: rgb(var(--primary-foreground));
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: var(--transition);
+            box-shadow: 0 4px 12px rgba(24, 119, 242, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(24, 119, 242, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            flex: 1;
+            min-width: 200px;
+            padding: 16px 32px;
+            background: transparent;
+            color: rgb(var(--primary));
+            border: 2px solid rgb(var(--primary));
+            border-radius: var(--radius-md);
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(24, 119, 242, 0.1);
+            transform: translateY(-2px);
+        }
+
+
+
+        /* ========== RESPONSIVE ========== */
+        @media (max-width: 768px) {
+            .success-container {
+                padding: 32px 16px;
+            }
+
+            .success-title {
+                font-size: 32px;
+            }
+
+            .info-card {
+                padding: 24px;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn-primary,
+            .btn-secondary {
+                width: 100%;
+                min-width: unset;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER -->
+    <header>
+        <div class="header-inner">
+            <a href="{% url 'shop' %}" class="logo">
+                <div class="logo-icon">
+                    <img src="{% static 'images/madam-da-logo.png' %}" alt="MADAM DA Logo" onerror="this.style.display='none'; this.parentElement.innerHTML='MD';">
+                </div>
+                <h1>MADAM DA</h1>
+            </a>
+        </div>
+    </header>
+
+    <!-- SUCCESS PAGE CONTENT -->
+    <div class="success-container">
+        <!-- HEADER SECTION -->
+        <div class="success-header">
+            <div class="success-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+            </div>
+            <h1 class="success-title">ORDER CONFIRMED!</h1>
+            <p class="success-subtitle">Thank you for your order!</p>
+        </div>
+
+        <!-- ORDER INFORMATION -->
+        <div class="info-card">
+            <h2 class="info-card-title">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v12.75c0 .621.504 1.125 1.125 1.125h11.25c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" />
+                </svg>
+                Order Information
+            </h2>
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">Order Number</span>
+                    <span class="info-value order-number">#{{ order_number }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Date & Time</span>
+                    <span class="info-value">{{ order_date }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- CUSTOMER INFORMATION -->
+        <div class="info-card">
+            <h2 class="info-card-title">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                </svg>
+                Customer Information
+            </h2>
+            <div class="customer-info">
+                <div class="info-item">
+                    <span class="info-label">Name</span>
+                    <span class="info-value">{{ name }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Phone</span>
+                    <span class="info-value">{{ phone }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Address</span>
+                    <span class="info-value">{{ address }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Province</span>
+                    <span class="info-value">{{ province }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ORDER SUMMARY -->
+        <div class="info-card">
+            <h2 class="info-card-title">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.222M7.5 14.25l13.5-5.222M5.106 5.222L12 17.25l-6.894-12.028M12 17.25l-6.894-12.028M12 17.25L18.894 5.222M12 17.25l-1.757-3.03M21.75 3.75v11.25a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V3.75m18 0A2.25 2.25 0 0018.75 1.5h-15A2.25 2.25 0 003.75 3.75m18 0V12a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V3.75" />
+                </svg>
+                Order Summary
+            </h2>
+            
+            <div class="order-items">
+                {% if items %}
+                    {% for item in items %}
+                    <div class="order-item">
+                        <span class="order-item-name">{{ item.name }}</span>
+                        <span class="order-item-qty">x{{ item.qty }}</span>
+                        <span class="order-item-price">${{ item.price|floatformat:2 }}</span>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p style="color: var(--text-light); text-align: center; padding: 20px 0;">No items in order</p>
+                {% endif %}
+            </div>
+
+            <div class="order-totals">
+                <div class="total-row">
+                    <span class="total-label">Subtotal</span>
+                    <span class="total-amount">${{ subtotal|floatformat:2 }}</span>
+                </div>
+                {% if discount > 0 %}
+                <div class="total-row" style="color: #10b981;">
+                    <span class="total-label">Discount</span>
+                    <span class="total-amount" style="color: #10b981;">-${{ discount|floatformat:2 }}</span>
+                </div>
+                {% endif %}
+                <div class="total-row">
+                    <span class="total-label">Shipping fee</span>
+                    <span class="total-amount">$0.00</span>
+                </div>
+                <div class="total-row final">
+                    <span class="total-label">Total</span>
+                    <span class="total-amount">${{ total|floatformat:2 }}</span>
+                </div>
+            </div>
+
+            <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border);">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span class="info-label">Payment Method:</span>
+                    <span class="payment-badge">
+                        {% if payment_method == "KHQR" %}
+                            <img alt="ABA KHQR" loading="lazy" width="32" height="32" decoding="async" class="khqr-icon" src="{% static 'images/bakong-logo.svg' %}" onerror="this.style.display='none'">
+                        {% else %}
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        {% endif %}
+                        {{ payment_method|default:"KHQR" }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- DELIVERY MESSAGE -->
+        <div class="delivery-message">
+            <p>📞 We will call you at <strong>{{ phone }}</strong> to confirm your delivery</p>
+            <p>📦 Delivery to: <strong>{{ province }}</strong></p>
+        </div>
+
+        <!-- ACTION BUTTONS -->
+        <div class="action-buttons" id="action-buttons">
+            <a href="{% url 'shop' %}" class="btn-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" style="width: 20px; height: 20px;">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                </svg>
+                Continue Shopping
+            </a>
+            <a href="https://t.me/+oLZQHwqUJytmZGY1" target="_blank" class="btn-secondary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.161c-.169 1.858-.896 6.371-1.268 8.453-.151.855-.447 1.14-.734 1.17-.621.064-1.092-.41-1.694-.803-.938-.656-1.47-1.064-2.382-1.703-1.04-.715-.367-1.108.227-1.75.155-.165 2.817-2.585 2.87-2.805.006-.027.012-.125-.047-.185-.059-.06-.144-.039-.207-.024-.089.02-1.495.951-4.22 2.792-.4.27-.762.401-1.087.394-.358-.008-1.046-.202-1.559-.368-.629-.204-1.128-.312-1.085-.658.022-.18.322-.365.886-.554 3.47-1.515 5.79-2.51 6.97-3.003 3.33-1.387 4.02-1.627 4.47-1.636.099-.002.321.024.465.146.118.1.151.234.167.328.016.094.036.308.02.475z"/>
+                </svg>
+                Contact Us
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Clear cart on success page load
+        localStorage.removeItem('madamda_cart');
+        
+        // Update cart badge if exists
+        const headerBadge = document.getElementById('header-badge');
+        if (headerBadge) {
+            headerBadge.textContent = '0';
+            headerBadge.classList.add('hidden');
+        }
+    </script>
+</body>
+</html>

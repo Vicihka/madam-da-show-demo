@@ -1,0 +1,74 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MADAM DA | Contact Us</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
+    <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.png' %}">
+    <link rel="apple-touch-icon" href="{% static 'images/favicon.png' %}">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: 24 119 242;
+            --primary-light: 66 165 245;
+            --text: 17 24 39;
+            --text-light: 107 114 128;
+            --bg: #fafafa;
+            --bg-card: #ffffff;
+            --border: #e5e7eb;
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+            --font-main: 'Inter', sans-serif;
+            --font-display: 'Playfair Display', serif;
+            --radius: 8px;
+            --radius-md: 12px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: var(--font-main); background: var(--bg); color: var(--text); line-height: 1.7; }
+        header { position: sticky; top: 0; background: white; border-bottom: 1px solid var(--border); z-index: 100; }
+        .header-inner { max-width: 1400px; margin: 0 auto; padding: 0 24px; height: 72px; display: flex; align-items: center; justify-content: space-between; }
+        .logo { display: flex; align-items: center; gap: 12px; cursor: pointer; }
+        .logo h1 { font-family: var(--font-display); font-size: 24px; font-weight: 700; color: rgb(var(--primary)); }
+        .container { max-width: 700px; margin: 0 auto; padding: 60px 24px; }
+        .page-header { text-align: center; margin-bottom: 40px; }
+        .page-header h1 { font-family: var(--font-display); font-size: clamp(36px, 5vw, 48px); margin-bottom: 16px; }
+        .content-section { background: var(--bg-card); padding: 40px; border-radius: var(--radius-md); box-shadow: var(--shadow-md); margin-bottom: 32px; text-align: center; }
+        .telegram-btn { display: inline-flex; align-items: center; gap: 12px; padding: 16px 32px; background: #0088cc; color: white; border-radius: var(--radius); text-decoration: none; font-weight: 600; font-size: 18px; transition: all 0.3s; margin: 20px 0; }
+        .telegram-btn:hover { background: #006ba3; transform: translateY(-2px); }
+        .btn-back { display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; background: rgb(var(--primary)); color: white; border-radius: var(--radius); text-decoration: none; font-weight: 600; margin-top: 40px; }
+        @media (max-width: 768px) { .container { padding: 40px 20px; } .content-section { padding: 24px; } }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-inner">
+            <div class="logo" onclick="window.location.href='{% url 'shop' %}'">
+                <h1>MADAM DA</h1>
+            </div>
+        </div>
+    </header>
+    <div class="container">
+        <div class="page-header">
+            <h1>Contact Us</h1>
+            <p>We're here to help! Reach out to us on Telegram</p>
+        </div>
+        <div class="content-section">
+            <p style="margin-bottom: 24px; font-size: 18px;">Get in touch with us via Telegram for the fastest response:</p>
+            <a href="https://t.me/+oLZQHwqUJytmZGY1" target="_blank" class="telegram-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.161c-.169 1.858-.896 6.371-1.268 8.453-.151.855-.447 1.14-.734 1.17-.621.064-1.092-.41-1.694-.803-.938-.656-1.47-1.064-2.382-1.703-1.04-.715-.367-1.108.227-1.75.155-.165 2.817-2.585 2.87-2.805.006-.027.012-.125-.047-.185-.059-.06-.144-.039-.207-.024-.089.02-1.495.951-4.22 2.792-.4.27-.762.401-1.087.394-.358-.008-1.046-.202-1.559-.368-.629-.204-1.128-.312-1.085-.658.022-.18.322-.365.886-.554 3.47-1.515 5.79-2.51 6.97-3.003 3.33-1.387 4.02-1.627 4.47-1.636.099-.002.321.024.465.146.118.1.151.234.167.328.016.094.036.308.02.475z"/>
+                </svg>
+                Contact on Telegram
+            </a>
+            <p style="margin-top: 24px; color: var(--text-light); font-size: 14px;">Click the button above to open Telegram and start a conversation with us!</p>
+        </div>
+        <a href="{% url 'shop' %}" class="btn-back">← Back to Shop</a>
+    </div>
+</body>
+</html>
+
+

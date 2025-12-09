@@ -1,0 +1,21 @@
+{% extends "admin/change_form.html" %}
+
+{% block content %}
+    {{ block.super }}
+    
+    {% if original and original.payment_method == 'Cash on Delivery' and not original.payment_received %}
+    <div style="margin: 20px 0; padding: 20px; background: #e3f2fd; border-left: 4px solid #2196f3; border-radius: 4px;">
+        <h3 style="margin-bottom: 15px; color: #1976d2;">📱 Print QR Code for Delivery</h3>
+        <p style="margin-bottom: 15px; color: #333;">Print this QR code and give it to the delivery driver. They can scan it to confirm payment after delivery.</p>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <a href="{% url 'cod_print' original.order_number %}" target="_blank" style="background: #28a745; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600; display: inline-block;">
+                🖨️ Print QR Code
+            </a>
+            <a href="{% url 'cod_qr' original.order_number %}" target="_blank" style="background: #2196f3; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600; display: inline-block;">
+                📱 View QR Code
+            </a>
+        </div>
+    </div>
+    {% endif %}
+{% endblock %}
+
