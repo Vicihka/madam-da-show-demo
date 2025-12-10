@@ -1,19 +1,13 @@
 @echo off
 REM ============================================
-REM Start Django Server (Normal - No WebSocket)
+REM Setup Environment Variables for MADAM DA
 REM ============================================
 
 echo.
 echo ============================================
-echo Starting Django Server (Normal Mode)
+echo MADAM DA - Environment Setup
 echo ============================================
 echo.
-echo NOTE: This server does NOT support WebSockets.
-echo For WebSocket support, use: START_SERVER_WEBSOCKET_DAPHNE.bat
-echo.
-
-REM Change to the project directory
-cd /d "%~dp0"
 
 REM Check if virtual environment exists
 if not exist "venv\Scripts\activate.bat" (
@@ -30,23 +24,25 @@ REM Activate virtual environment
 echo Activating virtual environment...
 call venv\Scripts\activate.bat
 
-echo.
-echo Starting Django development server...
-echo Server will be available at: http://127.0.0.1:8000
-echo.
-echo Press Ctrl+C to stop the server
-echo ============================================
-echo.
+REM Check if Django is installed
+python -c "import django" 2>nul
+if errorlevel 1 (
+    echo ERROR: Django is not installed!
+    echo Please install requirements:
+    echo   pip install -r requirements.txt
+    pause
+    exit /b 1
+)
 
-REM Start Django development server
-python manage.py runserver
+REM Run setup script
+echo.
+echo Running environment setup...
+python setup_env.py
 
-REM If server exits, show message
 echo.
 echo ============================================
-echo Server stopped.
+echo Setup Complete!
 echo ============================================
+echo.
 pause
-
-
 
