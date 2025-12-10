@@ -1324,6 +1324,87 @@ def track_order_view(request):
 
 
 @csrf_exempt
+@require_http_methods(["GET"])
+@apply_rate_limit('60/m', 'GET')
+def customer_lookup(request):
+    """API endpoint to lookup customer by phone number for auto-fill"""
+    try:
+        phone = request.GET.get('phone', '').strip()
+        
+        if not phone:
+            return JsonResponse({
+                'success': False,
+                'message': 'Phone number is required'
+            }, status=400)
+        
+        # Normalize phone number (remove spaces, dashes, etc.)
+        normalized_phone = ''.join(filter(str.isdigit, phone))
+        
+        if not normalized_phone:
+            return JsonResponse({
+                'success': False,
+                'message': 'Invalid phone number format'
+            }, status=400)
+        
+        # Try to find customer by phone (exact match or normalized)
+        try:
+            # First try exact match
+            customer = Customer.objects.get(phone=phone)
+        except Customer.DoesNotExist:
+            # Try normalized phone
+            try:
+                customer = Customer.objects.filter(phone__icontains=normalized_phone).first()
+            except:
+                customer = None
+        
+        # If still not found, try to find from recent orders
+        if not customer:
+            try:
+                # Get the most recent order with this phone number
+                order = Order.objects.filter(
+                    customer_phone__icontains=normalized_phone
+                ).order_by('-created_at').first()
+                
+                if order:
+                    # Return customer data from order
+                    return JsonResponse({
+                        'success': True,
+                        'customer': {
+                            'name': order.customer_name,
+                            'phone': order.customer_phone,
+                            'address': order.customer_address or '',
+                            'province': order.customer_province or ''
+                        }
+                    })
+            except Exception as e:
+                logger.warning(f"Error looking up customer from orders: {str(e)}")
+        
+        if customer:
+            return JsonResponse({
+                'success': True,
+                'customer': {
+                    'name': customer.name,
+                    'phone': customer.phone,
+                    'address': customer.address or '',
+                    'province': customer.province or ''
+                }
+            })
+        else:
+            # Customer not found - return success: false but don't error
+            return JsonResponse({
+                'success': False,
+                'message': 'Customer not found'
+            })
+            
+    except Exception as e:
+        logger.error(f"Error in customer_lookup: {str(e)}", exc_info=True)
+        return JsonResponse({
+            'success': False,
+            'message': 'An error occurred while looking up customer'
+        }, status=500)
+
+
+@csrf_exempt
 @require_http_methods(["POST"])
 def track_order_api(request):
     """API endpoint for customers to track their order by order number and phone"""

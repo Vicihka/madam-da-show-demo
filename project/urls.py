@@ -19,10 +19,12 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.conf.urls.i18n import i18n_patterns
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect, FileResponse
+from django.views.generic import RedirectView
 from app import views
 from app import employee_views
 import os
+from pathlib import Path
 
 # Admin URLs (not in i18n_patterns) - Use custom URL for security
 admin_url = os.environ.get('ADMIN_URL', 'admin/')
@@ -33,6 +35,8 @@ urlpatterns = [
     path('i18n/', include('django.conf.urls.i18n')),
     # Silence Chrome DevTools well-known file requests
     path('.well-known/appspecific/com.chrome.devtools.json', lambda r: HttpResponse('{}', content_type='application/json')),
+    # Favicon - browsers automatically request /favicon.ico
+    path('favicon.ico', RedirectView.as_view(url='/static/images/favicon.png', permanent=True)),
 ]
 
 # Multi-language URL patterns
@@ -45,6 +49,7 @@ urlpatterns += i18n_patterns(
     path('shipping-policy/', views.shipping_policy_view, name='shipping_policy'),
     path('privacy-policy/', views.privacy_policy_view, name='privacy_policy'),
     path('api/newsletter/subscribe/', views.newsletter_subscribe, name='newsletter_subscribe'),
+    path('api/customer/lookup/', views.customer_lookup, name='customer_lookup'),
     path('api/promo/validate/', views.validate_promo_code, name='validate_promo_code'),
     path('api/referral/check/', views.check_referral_code, name='check_referral_code'),
     path('api/loyalty/calculate/', views.calculate_loyalty_points, name='calculate_loyalty_points'),

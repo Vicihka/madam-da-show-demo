@@ -20,24 +20,8 @@ function debounce(func, wait) {
     };
 }
 
-// Debounced cart save
-const debouncedSaveCart = debounce(() => {
-    try {
-        localStorage.setItem('madamda_cart', JSON.stringify(cart));
-        try {
-            sessionStorage.setItem('madamda_cart_backup', JSON.stringify(cart));
-        } catch (e) {
-            console.warn('sessionStorage not available:', e);
-        }
-    } catch (e) {
-        console.error('Error saving cart:', e);
-        try {
-            sessionStorage.setItem('madamda_cart_backup', JSON.stringify(cart));
-        } catch (e2) {
-            console.error('Error saving to sessionStorage:', e2);
-        }
-    }
-}, 300);
+// Debounced cart save function (will be created after cart is initialized)
+let debouncedSaveCart;
 
 // ========== PRODUCTS DATA ==========
 // PRODUCTS array will be defined inline in HTML template (needs Django template processing)
@@ -84,10 +68,57 @@ function init() {
         }
     }
     
+    // Initialize debounced save function after cart is loaded
+    debouncedSaveCart = debounce(() => {
+        try {
+            localStorage.setItem('madamda_cart', JSON.stringify(cart));
+            try {
+                sessionStorage.setItem('madamda_cart_backup', JSON.stringify(cart));
+            } catch (e) {
+                console.warn('sessionStorage not available:', e);
+            }
+        } catch (e) {
+            console.error('Error saving cart:', e);
+            try {
+                sessionStorage.setItem('madamda_cart_backup', JSON.stringify(cart));
+            } catch (e2) {
+                console.error('Error saving to sessionStorage:', e2);
+            }
+        }
+    }, 300);
+    
     updateCartUI();
     // Initialize all product states on page load (only called once)
     updateProductStates();
     startHeroCarousel();
+    
+    // Close menu when clicking outside
+    document.addEventListener('click', function(event) {
+        const menu = document.getElementById('dropdown-menu');
+        const trigger = document.getElementById('menu-btn');
+        
+        if (menu && trigger && !menu.contains(event.target) && !trigger.contains(event.target)) {
+            closeMenu();
+        }
+    });
+    
+    // Close modal on outside click
+    document.addEventListener('click', function(e) {
+        const modal = document.getElementById('track-order-modal');
+        if (modal && e.target === modal) {
+            closeTrackOrder();
+        }
+    });
+    
+    // Close modal on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            const modal = document.getElementById('track-order-modal');
+            if (modal && modal.classList.contains('active')) {
+                closeTrackOrder();
+            }
+        }
+    });
     
     // Listen for storage changes to sync cart across tabs/pages
     window.addEventListener('storage', function(e) {
@@ -142,8 +173,17 @@ function init() {
 
 // ========== CART FUNCTIONS ==========
 function addToCart(productId) {
+    // Check if PRODUCTS array is available
+    if (typeof PRODUCTS === 'undefined' || !Array.isArray(PRODUCTS)) {
+        console.error('PRODUCTS array is not defined or not an array');
+        return;
+    }
+    
     const product = PRODUCTS.find(p => p.id === productId);
-    if (!product) return;
+    if (!product) {
+        console.warn(`Product with ID ${productId} not found in PRODUCTS array`);
+        return;
+    }
 
     const existingItem = cart.find(item => item.id === productId);
     
@@ -166,6 +206,12 @@ function addToCart(productId) {
 }
 
 function updateCartQty(productId, change) {
+    // Check if PRODUCTS array is available
+    if (typeof PRODUCTS === 'undefined' || !Array.isArray(PRODUCTS)) {
+        console.error('PRODUCTS array is not defined or not an array');
+        return;
+    }
+    
     // Find the specific item in cart
     let item = cart.find(i => i.id === productId);
     
@@ -267,16 +313,23 @@ function updateProductStates() {
 
 // Legacy saveCart function (kept for compatibility, but use debouncedSaveCart instead)
 function saveCart() {
-    debouncedSaveCart();
+    if (typeof debouncedSaveCart === 'function') {
+        debouncedSaveCart();
+    } else {
+        // Fallback if debouncedSaveCart not initialized yet
+        try {
+            localStorage.setItem('madamda_cart', JSON.stringify(cart));
+        } catch (e) {
+            console.error('Error saving cart:', e);
+        }
+    }
 }
 
 // Optimized updateCartUI with DOM caching and requestAnimationFrame
 function updateCartUI() {
     requestAnimationFrame(() => {
-        // Reload cart from localStorage to ensure sync
-        cart = JSON.parse(localStorage.getItem('madamda_cart')) || [];
-        
-        const count = cart.reduce((sum, item) => sum + item.qty, 0);
+        // Use current cart state (don't reload from localStorage here to avoid sync issues)
+        const count = cart.reduce((sum, item) => sum + (item.qty || 0), 0);
         
         // Header badge (using cached DOM)
         const headerBadge = DOMCache.headerBadge;
@@ -300,7 +353,7 @@ function updateCartUI() {
                 const imageUrl = item.image || '';
                 // Try to use WebP version if available
                 const webpUrl = imageUrl.replace(/\.(png|jpg|jpeg)$/i, '.webp');
-                return `<img src="${imageUrl}" alt="${item.name}" class="cart-thumb" loading="lazy" width="32" height="32" decoding="async" fetchpriority="low" onerror="this.onerror=null;">`;
+                return `<img src="${imageUrl}" alt="${item.name}" class="cart-thumb" loading="lazy" width="32" height="32" decoding="async" onerror="this.onerror=null;">`;
             }).join('');
             cartThumbs.innerHTML = thumbnails;
         }
@@ -364,15 +417,7 @@ function closeMenu() {
     menu.classList.remove('open');
 }
 
-// Close menu when clicking outside
-document.addEventListener('click', function(event) {
-    const menu = document.getElementById('dropdown-menu');
-    const trigger = document.getElementById('menu-btn');
-    
-    if (menu && trigger && !menu.contains(event.target) && !trigger.contains(event.target)) {
-        closeMenu();
-    }
-});
+// Close menu when clicking outside (will be set up in init)
 
 function setLanguage(lang) {
     // Language switching logic can be added here
@@ -535,23 +580,31 @@ function displayOrderDetails(order) {
     `;
 }
 
-// Close modal on outside click
-document.addEventListener('click', function(e) {
-    const modal = document.getElementById('track-order-modal');
-    if (modal && e.target === modal) {
-        closeTrackOrder();
-    }
-});
-
-// Close modal on Escape key
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
-        const modal = document.getElementById('track-order-modal');
-        if (modal && modal.classList.contains('active')) {
-            closeTrackOrder();
-        }
-    }
-});
+// Close modal handlers (will be set up in init)
 
 // ========== INITIALIZE APP ==========
-init();
+// Ensure functions are globally accessible for onclick handlers
+// This must be done before init() to ensure onclick handlers can access them
+// Expose all functions to global scope for onclick handlers
+window.addToCart = addToCart;
+window.updateCartQty = updateCartQty;
+window.toggleMenu = toggleMenu;
+window.closeMenu = closeMenu;
+window.setLanguage = setLanguage;
+window.openTrackOrder = openTrackOrder;
+window.closeTrackOrder = closeTrackOrder;
+window.setHeroSlide = setHeroSlide;
+window.trackOrder = trackOrder; // Expose trackOrder for form onsubmit
+
+// Verify PRODUCTS array is available
+if (typeof PRODUCTS === 'undefined') {
+    console.error('PRODUCTS array is not defined! Make sure the inline script with PRODUCTS runs before this script.');
+}
+
+// Initialize app after DOM is ready
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+} else {
+    // DOM is already loaded, initialize immediately
+    init();
+}

@@ -231,7 +231,7 @@
                         </svg>
                         <p class="empty-cart-text">Your cart is empty</p>
                         <p class="empty-cart-subtext">Add some products to get started!</p>
-                        <a href="{% url 'shop' %}" class="empty-cart-btn">
+                        <a href="${API_URLS.shop}" class="empty-cart-btn">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="1.5 1.97 21 19.78" stroke-width="1.5" stroke="currentColor" style="width: 18px; height: 18px; margin-right: 8px;">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"></path>
                             </svg>
@@ -334,7 +334,7 @@
             const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
             
             try {
-                const response = await fetch('{% url "validate_promo_code" %}', {
+                const response = await fetch(API_URLS.validatePromoCode, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -521,10 +521,9 @@
             `;
             
             try {
-                const createUrl = '{% url "create_khqr" %}';
                 // Round to 2 decimal places to avoid floating-point precision issues
                 const roundedTotal = Math.round(total * 100) / 100;
-                const response = await fetch(`${createUrl}?amount=${roundedTotal.toFixed(2)}&currency=USD`);
+                const response = await fetch(`${API_URLS.createKhqr}?amount=${roundedTotal.toFixed(2)}&currency=USD`);
                 
                 if (!response.ok) {
                     const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
@@ -637,8 +636,7 @@
                 }
                 
                 try {
-                    const checkUrl = '{% url "check_payment" %}';
-                    const response = await fetch(`${checkUrl}?md5=${md5}`);
+                    const response = await fetch(`${API_URLS.checkPayment}?md5=${md5}`);
                     
                     if (!response.ok) {
                         console.error(`Payment check failed: HTTP ${response.status}`);
@@ -696,7 +694,7 @@
                 const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
                                  document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '';
                 
-                const response = await fetch('{% url "create_order_on_payment" %}', {
+                const response = await fetch(API_URLS.createOrderOnPayment, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -762,7 +760,7 @@
                 const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
                                  document.cookie.match(/csrftoken=([^;]+)/)?.[1] || '';
                 
-                const response = await fetch('{% url "create_order_on_payment" %}', {
+                const response = await fetch(API_URLS.createOrderOnPayment, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -841,7 +839,7 @@
             const qrUrl = paymentMethod === 'khqr' && window.currentQRUrl ? window.currentQRUrl : '';
             
             // Build success page URL
-            const successUrl = `{% url 'order_success' %}?` +
+            const successUrl = `${API_URLS.orderSuccess}?` +
                 `order=${orderNumber}&` +
                 `name=${encodeURIComponent(name)}&` +
                 `phone=${encodeURIComponent(phone)}&` +
@@ -1039,6 +1037,20 @@
             autoFillTimeout = setTimeout(async () => {
                 try {
                     const response = await fetch(`/api/customer/lookup/?phone=${encodeURIComponent(phone)}`);
+                    
+                    // Check if response is OK and is JSON
+                    if (!response.ok) {
+                        // If 404 or other error, silently fail (customer not found)
+                        return;
+                    }
+                    
+                    // Check content type to ensure it's JSON
+                    const contentType = response.headers.get('content-type');
+                    if (!contentType || !contentType.includes('application/json')) {
+                        // Response is not JSON, silently fail
+                        return;
+                    }
+                    
                     const data = await response.json();
                     
                     if (data.success && data.customer) {
@@ -1076,7 +1088,12 @@
                         showToast('Customer information auto-filled!', 'success', 2000);
                     }
                 } catch (error) {
-                    console.error('Auto-fill error:', error);
+                    // Silently handle errors (customer not found or network issues)
+                    // Don't show error to user as this is a background feature
+                    if (error.name !== 'SyntaxError') {
+                        // Only log non-JSON parsing errors
+                        console.debug('Auto-fill lookup:', error.message);
+                    }
                 }
             }, 400); // 400ms debounce for optimal performance
             });
@@ -1105,3 +1122,15 @@
         }
         
         updateCheckoutView();
+        
+        // ========== EXPOSE FUNCTIONS TO GLOBAL SCOPE ==========
+        // Required for onclick handlers in HTML
+        window.toggleMenu = toggleMenu;
+        window.closeMenu = closeMenu;
+        window.setLanguage = setLanguage;
+        window.toggleTelegram = toggleTelegram;
+        window.applyPromoCode = applyPromoCode;
+        window.selectPayment = selectPayment;
+        window.closeModal = closeModal;
+        window.updateCartQty = updateCartQty;
+        window.removeFromCart = removeFromCart;

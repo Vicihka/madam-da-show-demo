@@ -82,10 +82,15 @@ class SecurityHeadersMiddleware(MiddlewareMixin):
         
         # Additional security headers
         response['X-Content-Type-Options'] = 'nosniff'
-        response['X-Frame-Options'] = 'DENY'
-        response['X-XSS-Protection'] = '1; mode=block'
+        # X-Frame-Options is redundant when CSP frame-ancestors is set, but kept for older browsers
+        # X-XSS-Protection is deprecated and not needed with CSP
         response['Referrer-Policy'] = 'strict-origin-when-cross-origin'
         response['Permissions-Policy'] = 'geolocation=(), microphone=(), camera=(self)'
+        
+        # Remove security headers from media files (not needed and causes warnings)
+        if request.path.startswith('/media/'):
+            response.pop('Content-Security-Policy', None)
+            response.pop('X-XSS-Protection', None)
         
         # Remove server information
         if 'Server' in response:

@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="MADAM DA - Premium Beauty & Cosmetics">
     <title>MADAM DA | Premium Beauty</title>
     
@@ -32,8 +32,8 @@
         <div class="header-inner">
             <div class="header-left">
                 <div class="menu-trigger">
-                    <button class="icon-btn menu-btn" id="menu-btn" onclick="toggleMenu()">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="3 6 18 12" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+                    <button class="icon-btn menu-btn" id="menu-btn" onclick="toggleMenu()" aria-label="Toggle menu" title="Toggle menu">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="3 6 18 12" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"></path>
                         </svg>
                     </button>
@@ -66,11 +66,11 @@
                 <h1>MADAM DA</h1>
             </div>
             <div class="header-actions">
-                <button class="icon-btn" onclick="window.location.href='{% url 'checkout' %}'">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="2.37 1.5 19.25 21" stroke-width="1.5" stroke="currentColor" style="width: 24px; height: 24px;">
+                <button class="icon-btn" onclick="window.location.href='{% url 'checkout' %}'" aria-label="View cart" title="View cart">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="2.37 1.5 19.25 21" stroke-width="1.5" stroke="currentColor" class="cart-icon" aria-hidden="true">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"></path>
                     </svg>
-                    <span class="cart-badge hidden" id="header-badge">0</span>
+                    <span class="cart-badge hidden" id="header-badge" aria-live="polite">0</span>
                 </button>
             </div>
         </div>
@@ -141,11 +141,10 @@
                                  decoding="async" 
                                  width="260" 
                                  height="312" 
-                                 fetchpriority="low"
                                  onerror="this.onerror=null; this.src='{{ product.image_urls.png|default:product.image }}';">
                         </picture>
                         {% else %}
-                        <img src="{{ product.image }}" alt="{{ product.name }}" class="product-image" loading="lazy" decoding="async" width="260" height="312" fetchpriority="low">
+                        <img src="{{ product.image }}" alt="{{ product.name }}" class="product-image" loading="lazy" decoding="async" width="260" height="312">
                         {% endif %}
                     </div>
                     <div class="product-info">
@@ -154,8 +153,8 @@
                             <span class="price-current">${{ product.price|floatformat:2 }}</span>
                             {% if product.old_price %}<span class="price-old">${{ product.old_price|floatformat:2 }}</span>{% endif %}
                         </div>
-                        <button class="btn-add-cart" onclick="addToCart('{{ product.id }}')">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="2.37 1.5 19.25 21" stroke-width="1.5" stroke="currentColor" style="width: 20px; height: 20px;">
+                        <button class="btn-add-cart" onclick="addToCart('{{ product.id }}')" aria-label="Add {{ product.name }} to cart" title="Add to cart">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="2.37 1.5 19.25 21" stroke-width="1.5" stroke="currentColor" class="cart-icon-small" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"></path>
                             </svg>
                             Add to Cart

@@ -285,7 +285,19 @@
     </div>
     
     
-    <script src="{% static \'js/checkout.js\' %}"></script>
+    <!-- API URLs for JavaScript -->
+    <script>
+        // Define API URLs for use in checkout.js
+        const API_URLS = {
+            validatePromoCode: '{% url "validate_promo_code" %}',
+            createKhqr: '{% url "create_khqr" %}',
+            checkPayment: '{% url "check_payment" %}',
+            createOrderOnPayment: '{% url "create_order_on_payment" %}',
+            orderSuccess: '{% url "order_success" %}',
+            shop: '{% url "shop" %}'
+        };
+    </script>
+    <script src="{% static 'js/checkout.js' %}"></script>
 </body>
 </html>
 

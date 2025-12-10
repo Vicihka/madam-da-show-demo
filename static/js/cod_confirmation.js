@@ -327,3 +327,8 @@
             }
         `;
         document.head.appendChild(style);
+        
+        // ========== EXPOSE FUNCTIONS TO GLOBAL SCOPE ==========
+        // Required for onclick handlers in HTML
+        window.startQRScan = startQRScan;
+        window.stopQRScan = stopQRScan;
