@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Employee Dashboard - Real-Time Order Management</title>
+    <title>Employee Dashboard</title>
     <style>
         * {
             margin: 0;
@@ -12,204 +12,197 @@
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: #f5f7fa;
-            padding: 10px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f5f5;
+            padding: 15px;
             color: #333;
         }
         
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: #fff;
             padding: 20px;
-            border-radius: 12px;
+            border-radius: 8px;
             margin-bottom: 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            position: sticky;
-            top: 10px;
-            z-index: 100;
-        }
-        
-        .header-top {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
         }
         
         .header h1 {
             font-size: 24px;
-            margin-bottom: 5px;
+            color: #333;
         }
         
-        .header p {
-            opacity: 0.9;
-            font-size: 14px;
-        }
-        
-        .auto-refresh {
-            background: rgba(255,255,255,0.2);
-            padding: 5px 10px;
+        .status-indicator {
+            padding: 8px 16px;
+            background: #e0e0e0;
             border-radius: 20px;
-            font-size: 12px;
+            font-size: 14px;
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 8px;
         }
         
-        .auto-refresh.active {
-            background: rgba(76, 175, 80, 0.3);
+        .status-indicator.connected {
+            background: #4caf50;
+            color: white;
         }
         
-        .auto-refresh.connected {
-            background: rgba(76, 175, 80, 0.4);
-        }
-        
-        .auto-refresh.disconnected {
-            background: rgba(244, 67, 54, 0.4);
-        }
-        
-        .order-card.moving {
-            transition: all 0.5s ease;
-            opacity: 0.7;
-        }
-        
-        .stats-grid {
+        .stats {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 10px;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 15px;
             margin-bottom: 20px;
         }
         
-        .stat-card {
-            background: white;
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            border-left: 4px solid;
+        .stat {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
             text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         
-        .stat-card.pending { border-left-color: #ffc107; }
-        .stat-card.preparing { border-left-color: #17a2b8; }
-        .stat-card.ready { border-left-color: #28a745; }
-        .stat-card.out { border-left-color: #007bff; }
-        .stat-card.delivered { border-left-color: #6c757d; }
-        
         .stat-number {
-            font-size: 28px;
-            font-weight: 700;
+            font-size: 32px;
+            font-weight: bold;
             color: #333;
             margin-bottom: 5px;
         }
         
         .stat-label {
+            font-size: 14px;
             color: #666;
-            font-size: 12px;
-            text-transform: uppercase;
         }
         
-        .new-order-alert {
-            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
-            color: white;
+        .search-bar {
+            background: #fff;
             padding: 15px;
-            border-radius: 10px;
+            border-radius: 8px;
             margin-bottom: 20px;
-            animation: pulse 2s infinite;
-            display: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         
-        .new-order-alert.show {
-            display: block;
+        .search-input {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
         }
         
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.02); }
+        .search-input:focus {
+            outline: none;
+            border-color: #2196F3;
         }
         
         .section {
-            background: white;
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 15px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #f0f0f0;
+            background: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         
         .section-title {
             font-size: 18px;
             font-weight: 600;
+            margin-bottom: 15px;
             color: #333;
         }
         
         .order-card {
-            background: #f8f9fa;
-            border-radius: 10px;
+            background: #f9f9f9;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
             padding: 15px;
             margin-bottom: 12px;
-            border-left: 5px solid #667eea;
-            transition: all 0.3s;
             position: relative;
         }
         
-        .order-card.new {
-            border-left-color: #ff6b6b;
-            animation: slideIn 0.5s;
-            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+        .order-checkbox {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
         }
         
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateX(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
+        .quick-actions-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #e0e0e0;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        
+        .quick-actions-btn:hover {
+            background: #d0d0d0;
+        }
+        
+        .quick-actions-menu {
+            position: fixed;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            min-width: 180px;
+            padding: 8px;
+            display: none;
+        }
+        
+        .quick-actions-menu.show {
+            display: block;
+        }
+        
+        .quick-action-item {
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        
+        .quick-action-item:hover {
+            background: #f0f0f0;
         }
         
         .order-header {
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
+            align-items: center;
             margin-bottom: 12px;
         }
         
         .order-number {
-            font-size: 20px;
-            font-weight: 700;
-            color: #667eea;
+            font-size: 18px;
+            font-weight: bold;
+            color: #2196F3;
         }
         
         .order-status {
-            padding: 5px 10px;
-            border-radius: 15px;
-            font-size: 11px;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
             font-weight: 600;
-            text-transform: uppercase;
         }
         
         .status-pending { background: #fff3cd; color: #856404; }
-        .status-confirmed { background: #d1ecf1; color: #0c5460; }
-        .status-preparing { background: #d4edda; color: #155724; }
-        .status-ready { background: #cce5ff; color: #004085; }
-        .status-out { background: #e2e3e5; color: #383d41; }
+        .status-preparing { background: #d1ecf1; color: #0c5460; }
+        .status-ready { background: #d4edda; color: #155724; }
+        .status-out { background: #cce5ff; color: #004085; }
         
         .order-info {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: 10px;
             margin-bottom: 12px;
+            font-size: 14px;
         }
         
         .info-item {
@@ -217,42 +210,27 @@
             flex-direction: column;
         }
         
-        /* Make Phone field narrower */
-        .info-item-phone {
-            max-width: 140px;
-            min-width: 120px;
-        }
-        
-        /* Make Address field wider */
-        .info-item-address {
-            grid-column: span 2;
-            min-width: 200px;
-        }
-        
         .info-label {
-            font-size: 11px;
+            font-size: 12px;
             color: #666;
-            text-transform: uppercase;
-            margin-bottom: 3px;
+            margin-bottom: 4px;
         }
         
         .info-value {
-            font-size: 14px;
             font-weight: 600;
             color: #333;
         }
         
         .order-items {
-            background: white;
+            background: #fff;
             padding: 12px;
-            border-radius: 8px;
+            border-radius: 6px;
             margin-bottom: 12px;
         }
         
         .order-items-title {
             font-size: 12px;
             color: #666;
-            text-transform: uppercase;
             margin-bottom: 8px;
             font-weight: 600;
         }
@@ -264,23 +242,12 @@
         .item-list li {
             padding: 6px 0;
             border-bottom: 1px solid #f0f0f0;
-            font-size: 14px;
             display: flex;
             justify-content: space-between;
         }
         
         .item-list li:last-child {
             border-bottom: none;
-        }
-        
-        .item-name {
-            font-weight: 600;
-            color: #333;
-        }
-        
-        .item-qty {
-            color: #667eea;
-            font-weight: 700;
         }
         
         .order-actions {
@@ -293,120 +260,77 @@
             padding: 10px 16px;
             border: none;
             border-radius: 6px;
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 600;
             cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-            transition: all 0.2s;
-            flex: 1;
-            min-width: 120px;
-            text-align: center;
+            transition: background 0.2s;
         }
         
-        .btn:active {
-            transform: scale(0.95);
+        .btn-primary { background: #2196F3; color: white; }
+        .btn-primary:hover { background: #1976D2; }
+        
+        .btn-success { background: #4caf50; color: white; }
+        .btn-success:hover { background: #45a049; }
+        
+        .btn-info { background: #17a2b8; color: white; }
+        .btn-info:hover { background: #138496; }
+        
+        .btn-warning { background: #ff9800; color: white; }
+        .btn-warning:hover { background: #f57c00; }
+        
+        .btn-print { background: #4caf50; color: white; }
+        .btn-print:hover { background: #45a049; }
+        
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
         }
         
-        .btn-primary {
-            background: #667eea;
-            color: white;
+        .btn.loading {
+            position: relative;
+            color: transparent;
         }
         
-        .btn-primary:hover {
-            background: #5568d3;
+        .btn.loading::after {
+            content: '';
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            top: 50%;
+            left: 50%;
+            margin-left: -8px;
+            margin-top: -8px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 0.8s linear infinite;
         }
         
-        .btn-success {
-            background: #28a745;
-            color: white;
-        }
-        
-        .btn-success:hover {
-            background: #218838;
-        }
-        
-        .btn-info {
-            background: #17a2b8;
-            color: white;
-        }
-        
-        .btn-info:hover {
-            background: #138496;
-        }
-        
-        .btn-warning {
-            background: #ffc107;
-            color: #333;
-        }
-        
-        .btn-warning:hover {
-            background: #e0a800;
-        }
-        
-        .btn-print {
-            background: #28a745;
-            color: white;
-        }
-        
-        .btn-print:hover {
-            background: #218838;
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
         
         .empty-state {
             text-align: center;
-            padding: 30px;
+            padding: 40px;
             color: #999;
         }
         
-        .empty-state-icon {
-            font-size: 48px;
-            margin-bottom: 10px;
-        }
-        
-        .time-ago {
-            font-size: 11px;
-            color: #999;
-            margin-top: 5px;
-        }
-        
-        @media (max-width: 768px) {
-            .order-header {
-                flex-direction: column;
-                gap: 8px;
-            }
-            
-            .order-info {
-                grid-template-columns: 1fr;
-            }
-            
-            .order-actions {
-                flex-direction: column;
-            }
-            
-            .btn {
-                width: 100%;
-            }
-        }
-        
-        /* ========== PHASE 1: TOAST NOTIFICATIONS ========== */
-        .toast-notification {
+        .toast {
             position: fixed;
             top: 20px;
             right: 20px;
-            padding: 14px 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            z-index: 10000;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 14px;
+            padding: 12px 20px;
+            border-radius: 6px;
+            color: white;
             font-weight: 500;
-            max-width: 400px;
-            animation: slideInRight 0.3s ease-out;
-            cursor: pointer;
+            z-index: 10000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
+        
+        .toast.success { background: #4caf50; }
+        .toast.error { background: #f44336; }
+        .toast.warning { background: #ff9800; }
         
         @keyframes slideInRight {
             from {
@@ -419,541 +343,325 @@
             }
         }
         
-        @keyframes slideOutRight {
-            from {
-                transform: translateX(0);
-                opacity: 1;
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        @media (max-width: 768px) {
+            .order-info {
+                grid-template-columns: 1fr;
             }
-            to {
-                transform: translateX(100%);
-                opacity: 0;
+            
+            .order-actions {
+                flex-direction: column;
             }
-        }
-        
-        /* ========== PHASE 2: BULK OPERATIONS ========== */
-        .bulk-actions {
-            display: none;
-            gap: 8px;
-            align-items: center;
-        }
-        
-        .bulk-actions.active {
-            display: flex;
-        }
-        
-        .bulk-select-all {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 13px;
-            color: #666;
-            cursor: pointer;
-            user-select: none;
-        }
-        
-        .bulk-select-all input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
-        }
-        
-        .bulk-btn {
-            padding: 8px 14px;
-            border: none;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            background: #667eea;
-            color: white;
-        }
-        
-        .bulk-btn:hover {
-            background: #5568d3;
-            transform: translateY(-1px);
-        }
-        
-        .bulk-btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            transform: none;
-        }
-        
-        .order-card {
-            position: relative;
-        }
-        
-        .order-checkbox {
-            position: absolute;
-            top: 15px;
-            left: 15px;
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-            z-index: 10;
-            opacity: 0;
-            transition: opacity 0.2s;
-        }
-        
-        .order-card:hover .order-checkbox,
-        .bulk-mode .order-checkbox {
-            opacity: 1;
-        }
-        
-        .order-card.selected {
-            background: #e8f0fe;
-            border-left-color: #667eea;
-            border-left-width: 8px;
-        }
-        
-        .keyboard-hint {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: rgba(0,0,0,0.8);
-            color: white;
-            padding: 12px 16px;
-            border-radius: 8px;
-            font-size: 12px;
-            z-index: 9999;
-            display: none;
-            max-width: 300px;
-        }
-        
-        .keyboard-hint.show {
-            display: block;
-        }
-        
-        .keyboard-hint kbd {
-            background: #333;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-family: monospace;
-            font-size: 11px;
-            margin: 0 2px;
-        }
-        
-        /* ========== PHASE 3: SEARCH & FILTER ========== */
-        .search-filter-bar {
-            background: white;
-            padding: 15px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-        
-        .search-input-wrapper {
-            flex: 1;
-            min-width: 200px;
-            position: relative;
-        }
-        
-        .search-input {
-            width: 100%;
-            padding: 10px 40px 10px 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: all 0.2s;
-        }
-        
-        .search-input:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-        
-        .search-icon {
-            position: absolute;
-            right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #999;
-            pointer-events: none;
-        }
-        
-        .filter-buttons {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-        
-        .filter-btn {
-            padding: 8px 16px;
-            border: 2px solid #e0e0e0;
-            background: white;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .filter-btn:hover {
-            border-color: #667eea;
-            color: #667eea;
-        }
-        
-        .filter-btn.active {
-            background: #667eea;
-            color: white;
-            border-color: #667eea;
-        }
-        
-        /* ========== PHASE 3: QUICK ACTIONS MENU ========== */
-        .quick-actions-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            width: 28px;
-            height: 28px;
-            border: none;
-            background: rgba(102, 126, 234, 0.1);
-            border-radius: 6px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transition: all 0.2s;
-            z-index: 5;
-            font-size: 18px;
-            line-height: 1;
-            padding: 0;
-        }
-        
-        .order-card:hover .quick-actions-btn {
-            opacity: 1;
-        }
-        
-        .quick-actions-menu {
-            position: fixed;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            z-index: 1000;
-            min-width: 180px;
-            max-width: 250px;
-            display: none;
-            padding: 4px;
-            margin: 0;
-        }
-        
-        .quick-actions-menu.show {
-            display: block;
-        }
-        
-        .quick-action-item {
-            padding: 10px 14px;
-            cursor: pointer;
-            border-radius: 6px;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            transition: all 0.2s;
-        }
-        
-        .quick-action-item:hover {
-            background: #f0f0f0;
-        }
-        
-        .quick-action-item.danger:hover {
-            background: #fee;
-            color: #dc3545;
-        }
-        
-        /* ========== PHASE 3: SMART SORTING INDICATORS ========== */
-        .order-card.urgent {
-            border-left-color: #dc3545;
-            border-left-width: 6px;
-            background: #fff5f5;
-        }
-        
-        .order-card.high-value {
-            border-left-color: #ffc107;
-            border-left-width: 6px;
-        }
-        
-        .order-card.old-order {
-            border-left-color: #ff9800;
-            border-left-width: 6px;
-        }
-        
-        .priority-badge {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 10px;
-            font-weight: 700;
-            text-transform: uppercase;
-            margin-left: 8px;
-        }
-        
-        .priority-badge.urgent {
-            background: #dc3545;
-            color: white;
-        }
-        
-        .priority-badge.high-value {
-            background: #ffc107;
-            color: #333;
-        }
-        
-        .priority-badge.old {
-            background: #ff9800;
-            color: white;
+            
+            .btn {
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body>
     <div class="header">
-        <div class="header-top">
-            <div>
-                <h1>📦 Employee Dashboard</h1>
-                <p>Real-time order management</p>
+        <h1>📦 Employee Dashboard</h1>
+        <div style="display: flex; align-items: center; gap: 12px;">
+            <button onclick="refreshOrders(); showToast('Refreshing orders...', 'info');" style="background: rgba(0,0,0,0.05); border: 1px solid #ddd; border-radius: 6px; padding: 6px 12px; cursor: pointer; font-size: 14px;" title="Refresh Orders">
+                🔄 Refresh
+            </button>
+            <button id="soundToggle" onclick="toggleSound()" style="background: rgba(0,0,0,0.05); border: 1px solid #ddd; border-radius: 6px; padding: 6px 12px; cursor: pointer; font-size: 14px;" title="Toggle sound notifications">
+                <span id="soundIcon">🔊</span> <span id="soundText">Sound ON</span>
+            </button>
+            <div class="status-indicator" id="wsStatus">
+                <span id="wsIcon">🔄</span>
+                <span id="wsText">Connecting...</span>
             </div>
-            <div class="auto-refresh" id="autoRefresh">
-                <span id="wsStatus">🔄</span>
-                <span id="wsStatusText">Connecting...</span>
-            </div>
         </div>
     </div>
     
-    <div class="new-order-alert" id="newOrderAlert">
-        <strong>🔔 NEW ORDER RECEIVED!</strong>
-        <p>Check "Orders to Prepare" section below</p>
-    </div>
-    
-    <!-- PHASE 3: Quick Search & Filter -->
-    <div class="search-filter-bar">
-        <div class="search-input-wrapper">
-            <input type="text" id="orderSearch" class="search-input" placeholder="🔍 Search by order number, customer name, or phone..." onkeyup="window.filterOrders()">
-            <span class="search-icon">🔍</span>
-        </div>
-        <div class="filter-buttons">
-            <button class="filter-btn active" onclick="window.setFilter('all')" data-filter="all">All Orders</button>
-            <button class="filter-btn" onclick="window.setFilter('cod')" data-filter="cod">COD Only</button>
-            <button class="filter-btn" onclick="window.setFilter('paid')" data-filter="paid">Paid</button>
-            <button class="filter-btn" onclick="window.setFilter('unpaid')" data-filter="unpaid">Unpaid</button>
-            <button class="filter-btn" onclick="window.setFilter('urgent')" data-filter="urgent">⚠️ Urgent</button>
-        </div>
-        <button class="filter-btn" onclick="window.sortOrdersByPriority()" title="Sort by priority (COD first, then by amount)">
-            📊 Sort by Priority
-        </button>
-        <button class="filter-btn" onclick="window.batchPrintQRCodes()" title="Print QR codes for selected COD orders" id="batchPrintBtn" style="display: none;">
-            🖨️ Print QR Codes (<span id="batchPrintCount">0</span>)
-        </button>
-    </div>
-    
-    <div class="stats-grid">
-        <div class="stat-card pending">
+    <div class="stats">
+        <div class="stat">
             <div class="stat-number" id="statPending">{{ total_to_prepare }}</div>
             <div class="stat-label">To Prepare</div>
         </div>
-        <div class="stat-card preparing">
+        <div class="stat">
             <div class="stat-number" id="statPreparing">{{ total_preparing }}</div>
             <div class="stat-label">Preparing</div>
         </div>
-        <div class="stat-card ready">
+        <div class="stat">
             <div class="stat-number" id="statReady">{{ total_ready }}</div>
             <div class="stat-label">Ready</div>
         </div>
-        <div class="stat-card out">
+        <div class="stat">
             <div class="stat-number" id="statOut">{{ total_out }}</div>
             <div class="stat-label">Out</div>
         </div>
-        <div class="stat-card delivered">
+        <div class="stat">
             <div class="stat-number" id="statDelivered">{{ orders_delivered_today|length }}</div>
             <div class="stat-label">Received</div>
         </div>
     </div>
     
+    <div class="search-bar">
+        <input type="text" id="searchInput" class="search-input" placeholder="🔍 Search orders by number, name, or phone..." onkeyup="filterOrders()">
+        <button onclick="document.getElementById('searchInput').value=''; filterOrders();" style="margin-left: 10px; padding: 10px 15px; background: #f44336; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600;" title="Clear search">
+            ✕ Clear
+        </button>
+    </div>
+    
     <!-- Orders to Prepare -->
     <div class="section">
-        <div class="section-header">
-            <h2 class="section-title">📋 Orders to Prepare <span id="countToPrepare">({{ total_to_prepare }})</span></h2>
-            <div class="bulk-actions" id="bulkActionsOrdersToPrepare">
-                <label class="bulk-select-all">
-                    <input type="checkbox" id="selectAllToPrepare" onchange="window.toggleSelectAll('ordersToPrepare', this.checked)">
-                    <span>Select All</span>
-                </label>
-                <button class="bulk-btn" onclick="window.bulkUpdateStatus('ordersToPrepare', 'preparing', this)" id="bulkStartPreparing">
-                    👷 Start Preparing (<span id="bulkCountToPrepare">0</span>)
-                </button>
-            </div>
-        </div>
+        <h2 class="section-title">📋 Orders to Prepare <span id="countToPrepare">({{ total_to_prepare }})</span></h2>
         <div id="ordersToPrepare">
             {% if orders_to_prepare %}
                 {% for order in orders_to_prepare %}
                     {% include 'app/employee_order_card.html' with order=order show_items=True %}
                 {% endfor %}
             {% else %}
-                <div class="empty-state">
-                    <div class="empty-state-icon">✅</div>
-                    <p>No orders to prepare</p>
-                </div>
+                <div class="empty-state">No orders to prepare</div>
             {% endif %}
         </div>
     </div>
     
     <!-- Orders Being Prepared -->
     <div class="section">
-        <div class="section-header">
-            <h2 class="section-title">⚙️ Currently Preparing <span id="countPreparing">({{ total_preparing }})</span></h2>
-            <div class="bulk-actions" id="bulkActionsOrdersPreparing">
-                <label class="bulk-select-all">
-                    <input type="checkbox" id="selectAllPreparing" onchange="window.toggleSelectAll('ordersPreparing', this.checked)">
-                    <span>Select All</span>
-                </label>
-                <button class="bulk-btn" onclick="window.bulkUpdateStatus('ordersPreparing', 'ready_for_delivery', this)" id="bulkMarkReady">
-                    ✅ Mark Ready (<span id="bulkCountPreparing">0</span>)
-                </button>
-            </div>
-        </div>
+        <h2 class="section-title">⚙️ Currently Preparing <span id="countPreparing">({{ total_preparing }})</span></h2>
         <div id="ordersPreparing">
             {% if orders_preparing %}
                 {% for order in orders_preparing %}
                     {% include 'app/employee_order_card.html' with order=order show_items=True %}
                 {% endfor %}
             {% else %}
-                <div class="empty-state">
-                    <div class="empty-state-icon">📦</div>
-                    <p>No orders being prepared</p>
-                </div>
+                <div class="empty-state">No orders being prepared</div>
             {% endif %}
         </div>
     </div>
     
     <!-- Orders Ready for Delivery -->
     <div class="section">
-        <div class="section-header">
-            <h2 class="section-title">✅ Ready for Delivery <span id="countReady">({{ total_ready }})</span></h2>
-            <div class="bulk-actions" id="bulkActionsOrdersReady">
-                <label class="bulk-select-all">
-                    <input type="checkbox" id="selectAllReady" onchange="window.toggleSelectAll('ordersReady', this.checked)">
-                    <span>Select All</span>
-                </label>
-                <button class="bulk-btn" onclick="window.bulkUpdateStatus('ordersReady', 'out_for_delivery', this)" id="bulkOutDelivery">
-                    🚚 Out for Delivery (<span id="bulkCountReady">0</span>)
-                </button>
-            </div>
-        </div>
+        <h2 class="section-title">✅ Ready for Delivery <span id="countReady">({{ total_ready }})</span></h2>
         <div id="ordersReady">
             {% if orders_ready %}
                 {% for order in orders_ready %}
                     {% include 'app/employee_order_card.html' with order=order %}
                 {% endfor %}
             {% else %}
-                <div class="empty-state">
-                    <div class="empty-state-icon">🚚</div>
-                    <p>No orders ready for delivery</p>
-                </div>
+                <div class="empty-state">No orders ready</div>
             {% endif %}
         </div>
     </div>
     
     <!-- Orders Out for Delivery -->
     <div class="section">
-        <div class="section-header">
-            <h2 class="section-title">🚚 Out for Delivery <span id="countOut">({{ total_out }})</span></h2>
-        </div>
+        <h2 class="section-title">🚚 Out for Delivery <span id="countOut">({{ total_out }})</span></h2>
         <div id="ordersOut">
             {% if orders_out %}
                 {% for order in orders_out %}
                     {% include 'app/employee_order_card.html' with order=order %}
                 {% endfor %}
             {% else %}
-                <div class="empty-state">
-                    <div class="empty-state-icon">📬</div>
-                    <p>No orders out for delivery</p>
-                </div>
+                <div class="empty-state">No orders out</div>
             {% endif %}
         </div>
     </div>
     
-    <!-- Customer Received (Delivered Orders) -->
+    <!-- Customer Received -->
     <div class="section">
-        <div class="section-header">
-            <h2 class="section-title">✅ Customer Received <span id="countDelivered">({{ orders_delivered_today|length }})</span></h2>
-        </div>
+        <h2 class="section-title">✅ Customer Received <span id="countDelivered">({{ orders_delivered_today|length }})</span></h2>
         <div id="ordersDelivered">
             {% if orders_delivered_today %}
                 {% for order in orders_delivered_today %}
                     {% include 'app/employee_order_card.html' with order=order show_items=False %}
                 {% endfor %}
             {% else %}
-                <div class="empty-state">
-                    <div class="empty-state-icon">✅</div>
-                    <p>No orders received by customers today</p>
-                </div>
+                <div class="empty-state">No orders received today</div>
             {% endif %}
         </div>
     </div>
     
     <script>
-        // ========== PHASE 1, 2, 3: GLOBAL FUNCTIONS (Defined First) ==========
-        
-        // PHASE 1: Toast Notification System
-        function showToast(message, type = 'info', duration = 3000) {
-            // Remove existing toasts
-            const existingToasts = document.querySelectorAll('.toast-notification');
-            existingToasts.forEach(toast => toast.remove());
-            
-            const toast = document.createElement('div');
-            toast.className = 'toast-notification';
-            const bgColor = type === 'error' ? '#ef4444' : type === 'success' ? '#10b981' : type === 'warning' ? '#f59e0b' : '#3b82f6';
-            toast.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                background: ${bgColor};
-                color: white;
-                padding: 14px 20px;
-                border-radius: 8px;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-                z-index: 10000;
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                font-size: 14px;
-                font-weight: 500;
-                max-width: 400px;
-                animation: slideInRight 0.3s ease-out;
-                cursor: pointer;
-            `;
-            
-            const icon = type === 'error' ? '❌' : type === 'success' ? '✅' : type === 'warning' ? '⚠️' : 'ℹ️';
-            toast.innerHTML = `<span>${icon}</span><span>${message}</span>`;
-            
-            document.body.appendChild(toast);
-            
-            // Auto-remove after duration
-            setTimeout(() => {
-                toast.style.animation = 'slideOutRight 0.3s ease-out';
-                setTimeout(() => toast.remove(), 300);
-            }, duration);
-            
-            // Click to dismiss
-            toast.addEventListener('click', () => {
-                toast.style.animation = 'slideOutRight 0.3s ease-out';
-                setTimeout(() => toast.remove(), 300);
-            });
+        // Helper functions
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
         }
         
-        // PHASE 2 & 3: Global variables
-        window.currentFilter = 'all';
-        let quickActionsMenu = null;
-        let keyboardHintTimeout;
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
         
-        // PHASE 3: Filter Orders
-        window.filterOrders = function() {
-            const searchTerm = document.getElementById('orderSearch')?.value.toLowerCase() || '';
+        // Update Status Function
+        window.updateStatus = async function(orderNumber, newStatus) {
+            // Find and disable all buttons for this order
+            const orderCard = document.querySelector(`[data-order="${orderNumber}"]`);
+            const buttons = orderCard ? orderCard.querySelectorAll('.btn') : [];
+            buttons.forEach(btn => {
+                btn.disabled = true;
+                btn.classList.add('loading');
+            });
+            
+            try {
+                const response = await fetch(`/api/employee/order/${orderNumber}/status/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({ status: newStatus })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    showToast(`Order ${orderNumber} updated`, 'success');
+                    // Don't call refreshOrders() - WebSocket will handle the update in real-time
+                } else {
+                    showToast('Error: ' + data.message, 'error');
+                    // Re-enable buttons on error
+                    buttons.forEach(btn => {
+                        btn.disabled = false;
+                        btn.classList.remove('loading');
+                    });
+                }
+            } catch (error) {
+                showToast('Error: ' + error.message, 'error');
+                // Re-enable buttons on error
+                buttons.forEach(btn => {
+                    btn.disabled = false;
+                    btn.classList.remove('loading');
+                });
+            }
+        };
+        
+        // Confirm Payment
+        window.confirmPayment = async function(orderNumber) {
+            if (!confirm('Confirm payment received for order #' + orderNumber + '?')) return;
+            
+            // Find and disable confirm payment button
+            const orderCard = document.querySelector(`[data-order="${orderNumber}"]`);
+            const confirmBtn = orderCard ? orderCard.querySelector('button[onclick*="confirmPayment"]') : null;
+            if (confirmBtn) {
+                confirmBtn.disabled = true;
+                confirmBtn.classList.add('loading');
+            }
+            
+            try {
+                const response = await fetch(`/api/employee/order/${orderNumber}/confirm-payment/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({ notes: '' })
+                });
+                
+                const data = await response.json();
+                if (data.success) {
+                    showToast('Payment confirmed', 'success');
+                    // Don't call refreshOrders() - WebSocket will handle the update in real-time
+                } else {
+                    showToast('Error: ' + data.message, 'error');
+                    // Re-enable button on error
+                    if (confirmBtn) {
+                        confirmBtn.disabled = false;
+                        confirmBtn.classList.remove('loading');
+                    }
+                }
+            } catch (error) {
+                showToast('Error: ' + error.message, 'error');
+                // Re-enable button on error
+                if (confirmBtn) {
+                    confirmBtn.disabled = false;
+                    confirmBtn.classList.remove('loading');
+                }
+            }
+        };
+        
+        // Missing functions required by order card template
+        window.updateBulkActions = function() {
+            // Placeholder - bulk actions not implemented in simplified version
+            // This prevents errors when checkbox is clicked
+        };
+        
+        window.showQuickActions = function(event, orderNumber) {
+            event.stopPropagation();
+            
+            // Remove existing menu
+            const existing = document.querySelector('.quick-actions-menu');
+            if (existing) existing.remove();
+            
+            // Create menu
+            const menu = document.createElement('div');
+            menu.className = 'quick-actions-menu show';
+            
+            const orderCard = document.querySelector(`[data-order="${orderNumber}"]`);
+            if (!orderCard) return;
+            
+            const rect = event.target.getBoundingClientRect();
+            menu.style.left = (rect.right + 10) + 'px';
+            menu.style.top = rect.top + 'px';
+            
+            // Get order details for menu
+            const paymentMethod = orderCard.getAttribute('data-payment-method') || '';
+            const customerPhone = orderCard.getAttribute('data-customer-phone') || '';
+            
+            let menuItems = '';
+            
+            // View Details
+            menuItems += `<div class="quick-action-item" onclick="window.open('/employee/order/${orderNumber}/', '_blank'); this.closest('.quick-actions-menu').remove();">
+                👁️ View Details
+            </div>`;
+            
+            // Print QR (only for COD)
+            if (paymentMethod === 'Cash on Delivery') {
+                menuItems += `<div class="quick-action-item" onclick="window.open('/employee/order/${orderNumber}/print/', '_blank'); this.closest('.quick-actions-menu').remove();">
+                    🖨️ Print QR
+                </div>`;
+            }
+            
+            // Call Customer
+            if (customerPhone) {
+                const cleanPhone = customerPhone.replace(/\D/g, '');
+                menuItems += `<div class="quick-action-item" onclick="window.location.href='tel:${cleanPhone}'; this.closest('.quick-actions-menu').remove();">
+                    📞 Call Customer
+                </div>`;
+            }
+            
+            // Copy Order Number
+            menuItems += `<div class="quick-action-item" onclick="navigator.clipboard.writeText('${orderNumber}'); showToast('Order number copied', 'success'); this.closest('.quick-actions-menu').remove();">
+                📋 Copy Order Number
+            </div>`;
+            
+            menu.innerHTML = menuItems;
+            
+            document.body.appendChild(menu);
+            
+            // Close on outside click
+            setTimeout(() => {
+                document.addEventListener('click', function closeMenu() {
+                    menu.remove();
+                    document.removeEventListener('click', closeMenu);
+                }, { once: true });
+            }, 100);
+        };
+        
+        // Search/Filter
+        function filterOrders() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
             const sections = ['ordersToPrepare', 'ordersPreparing', 'ordersReady', 'ordersOut', 'ordersDelivered'];
             
             sections.forEach(sectionId => {
@@ -961,1162 +669,49 @@
                 if (!container) return;
                 
                 const cards = container.querySelectorAll('.order-card');
-                let visibleCount = 0;
+                let visible = 0;
                 
                 cards.forEach(card => {
-                    const orderNumber = card.getAttribute('data-order') || '';
-                    const customerName = card.getAttribute('data-customer-name') || '';
-                    const customerPhone = card.getAttribute('data-customer-phone') || '';
-                    const paymentMethod = card.getAttribute('data-payment-method') || '';
-                    const paymentReceived = card.getAttribute('data-payment-received') === 'true';
-                    
-                    const matchesSearch = !searchTerm || 
-                        orderNumber.toLowerCase().includes(searchTerm) ||
-                        customerName.includes(searchTerm) ||
-                        customerPhone.includes(searchTerm);
-                    
-                    let matchesFilter = true;
-                    if (window.currentFilter === 'cod') {
-                        matchesFilter = paymentMethod === 'Cash on Delivery';
-                    } else if (window.currentFilter === 'paid') {
-                        matchesFilter = paymentReceived;
-                    } else if (window.currentFilter === 'unpaid') {
-                        matchesFilter = !paymentReceived && paymentMethod === 'Cash on Delivery';
-                    } else if (window.currentFilter === 'urgent') {
-                        matchesFilter = card.classList.contains('urgent') || card.classList.contains('old-order');
-                    }
-                    
-                    if (matchesSearch && matchesFilter) {
+                    const text = card.textContent.toLowerCase();
+                    if (text.includes(search)) {
                         card.style.display = '';
-                        visibleCount++;
+                        visible++;
                     } else {
                         card.style.display = 'none';
                     }
                 });
-                
-                const emptyState = container.querySelector('.empty-state');
-                if (emptyState) {
-                    emptyState.style.display = visibleCount === 0 ? '' : 'none';
-                }
             });
-        };
-        
-        // PHASE 3: Set Filter
-        window.setFilter = function(filter) {
-            window.currentFilter = filter;
-            document.querySelectorAll('.filter-btn').forEach(btn => {
-                btn.classList.remove('active');
-                if (btn.getAttribute('data-filter') === filter) {
-                    btn.classList.add('active');
-                }
-            });
-            window.filterOrders();
-        };
-        
-        // PHASE 3: Sort Orders by Priority
-        window.sortOrdersByPriority = function() {
-            const sections = ['ordersToPrepare', 'ordersPreparing', 'ordersReady', 'ordersOut'];
-            sections.forEach(sectionId => {
-                const container = document.getElementById(sectionId);
-                if (!container) return;
-                const cards = Array.from(container.querySelectorAll('.order-card'));
-                cards.sort((a, b) => {
-                    const aIsCOD = a.getAttribute('data-payment-method') === 'Cash on Delivery';
-                    const bIsCOD = b.getAttribute('data-payment-method') === 'Cash on Delivery';
-                    if (aIsCOD && !bIsCOD) return -1;
-                    if (!aIsCOD && bIsCOD) return 1;
-                    const aTotal = parseFloat(a.getAttribute('data-total') || 0);
-                    const bTotal = parseFloat(b.getAttribute('data-total') || 0);
-                    if (aTotal !== bTotal) return bTotal - aTotal;
-                    const aTime = a.querySelector('.time-ago')?.textContent || '';
-                    const bTime = b.querySelector('.time-ago')?.textContent || '';
-                    return aTime.localeCompare(bTime);
-                });
-                cards.forEach(card => container.appendChild(card));
-            });
-            if (window.showToast) window.showToast('Orders sorted by priority', 'success', 2000);
-        };
-        
-        // PHASE 3: Batch Print QR Codes
-        window.batchPrintQRCodes = function() {
-            const checked = document.querySelectorAll('.order-checkbox:checked');
-            const codOrders = Array.from(checked).filter(cb => {
-                const card = cb.closest('.order-card');
-                return card && card.getAttribute('data-payment-method') === 'Cash on Delivery';
-            });
-            if (codOrders.length === 0) {
-                if (window.showToast) window.showToast('Please select COD orders to print QR codes', 'warning');
-                return;
-            }
-            codOrders.forEach(cb => {
-                const orderNumber = cb.getAttribute('data-order');
-                window.open(`/employee/order/${orderNumber}/print/`, '_blank');
-            });
-            if (window.showToast) window.showToast(`Opening ${codOrders.length} QR code(s) for printing`, 'success');
-        };
-        
-        // PHASE 2: Update Bulk Actions
-        window.updateBulkActions = function() {
-            const sectionMap = {
-                'ordersToPrepare': 'bulkActionsOrdersToPrepare',
-                'ordersPreparing': 'bulkActionsOrdersPreparing',
-                'ordersReady': 'bulkActionsOrdersReady',
-                'ordersOut': 'bulkActionsOrdersOut'
-            };
-            
-            Object.keys(sectionMap).forEach(sectionId => {
-                const container = document.getElementById(sectionId);
-                if (!container) return;
-                
-                const checked = container.querySelectorAll('.order-checkbox:checked').length;
-                const bulkActions = document.getElementById(sectionMap[sectionId]);
-                
-                if (bulkActions) {
-                    const countSpan = bulkActions.querySelector('span');
-                    if (checked > 0) {
-                        bulkActions.classList.add('active');
-                        if (countSpan) countSpan.textContent = checked;
-                    } else {
-                        bulkActions.classList.remove('active');
-                    }
-                }
-            });
-            
-            // Update batch print button
-            const checked = document.querySelectorAll('.order-checkbox:checked');
-            const codOrders = Array.from(checked).filter(cb => {
-                const card = cb.closest('.order-card');
-                return card && card.getAttribute('data-payment-method') === 'Cash on Delivery';
-            });
-            const batchPrintBtn = document.getElementById('batchPrintBtn');
-            const batchPrintCount = document.getElementById('batchPrintCount');
-            if (batchPrintBtn && batchPrintCount) {
-                if (codOrders.length > 0) {
-                    batchPrintBtn.style.display = 'block';
-                    batchPrintCount.textContent = codOrders.length;
-                } else {
-                    batchPrintBtn.style.display = 'none';
-                }
-            }
-        };
-        
-        // PHASE 2: Toggle Select All
-        window.toggleSelectAll = function(sectionId, checked) {
-            const container = document.getElementById(sectionId);
-            if (!container) return;
-            
-            const checkboxes = container.querySelectorAll('.order-checkbox');
-            checkboxes.forEach(cb => {
-                cb.checked = checked;
-                const card = cb.closest('.order-card');
-                if (card) {
-                    if (checked) {
-                        card.classList.add('selected');
-                    } else {
-                        card.classList.remove('selected');
-                    }
-                }
-            });
-            window.updateBulkActions();
-        };
-        
-        // PHASE 2: Bulk Update Status
-        window.bulkUpdateStatus = async function(sectionId, newStatus, buttonElement) {
-            const container = document.getElementById(sectionId);
-            if (!container) return;
-            
-            const checked = container.querySelectorAll('.order-checkbox:checked');
-            if (checked.length === 0) {
-                showToast('Please select at least one order', 'warning');
-                return;
-            }
-            
-            const orderNumbers = Array.from(checked).map(cb => cb.getAttribute('data-order'));
-            const statusNames = {
-                'preparing': 'Start Preparing',
-                'ready_for_delivery': 'Mark Ready',
-                'out_for_delivery': 'Out for Delivery',
-                'delivered': 'Delivered'
-            };
-            
-            if (!confirm(`Update ${orderNumbers.length} order(s) to "${statusNames[newStatus]}"?`)) {
-                return;
-            }
-            
-            // Disable buttons during update
-            const bulkBtn = buttonElement || (event && event.target);
-            const originalText = bulkBtn ? bulkBtn.innerHTML : '';
-            if (bulkBtn) {
-                bulkBtn.disabled = true;
-                bulkBtn.innerHTML = '⏳ Updating...';
-            }
-            
-            let successCount = 0;
-            let errorCount = 0;
-            
-            // Update orders in parallel
-            const promises = orderNumbers.map(async (orderNumber) => {
-                try {
-                    const response = await fetch(`/api/employee/order/${orderNumber}/status/`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ status: newStatus })
-                    });
-                    
-                    const data = await response.json();
-                    if (data.success) {
-                        successCount++;
-                    } else {
-                        errorCount++;
-                    }
-                } catch (error) {
-                    errorCount++;
-                }
-            });
-            
-            await Promise.all(promises);
-            
-            // Re-enable button
-            if (bulkBtn) {
-                bulkBtn.disabled = false;
-                bulkBtn.innerHTML = originalText;
-            }
-            
-            // Show result
-            if (successCount > 0) {
-                showToast(`✅ Updated ${successCount} order(s) successfully`, 'success');
-            }
-            if (errorCount > 0) {
-                showToast(`❌ Failed to update ${errorCount} order(s)`, 'error');
-            }
-            
-            // Clear selections and refresh
-            checked.forEach(cb => {
-                cb.checked = false;
-                const card = cb.closest('.order-card');
-                if (card) card.classList.remove('selected');
-            });
-            window.updateBulkActions();
-            
-            // Refresh orders after a short delay
-            setTimeout(() => {
-                refreshOrders();
-                updateCounters();
-            }, 500);
-        };
-        
-        // PHASE 3: Show Quick Actions
-        window.showQuickActions = function(event, orderNumber) {
-            event.stopPropagation();
-            
-            // Remove existing menu
-            if (quickActionsMenu) {
-                quickActionsMenu.remove();
-            }
-            
-            // Find order card
-            const orderCard = document.querySelector(`[data-order="${orderNumber}"]`);
-            if (!orderCard) return;
-            
-            // Get order details
-            const customerName = orderCard.querySelector('.info-value')?.textContent || '';
-            const customerPhone = Array.from(orderCard.querySelectorAll('.info-value'))[1]?.textContent || '';
-            const paymentMethod = orderCard.getAttribute('data-payment-method') || '';
-            const paymentReceived = orderCard.getAttribute('data-payment-received') === 'true';
-            
-            // Create menu
-            quickActionsMenu = document.createElement('div');
-            quickActionsMenu.className = 'quick-actions-menu show';
-            
-            // Use fixed position values (you can change these)
-            const fixedLeft = 857;  // Change this to your desired left position
-            const fixedTop = 287;   // Change this to your desired top position
-            
-            // Set fixed position
-            quickActionsMenu.style.left = fixedLeft + 'px';
-            quickActionsMenu.style.top = fixedTop + 'px';
-            
-            let menuItems = '';
-            
-            // Print QR (COD only)
-            if (paymentMethod === 'Cash on Delivery') {
-                menuItems += `<div class="quick-action-item" onclick="window.open('/employee/order/${orderNumber}/print/', '_blank'); window.closeQuickActions();">
-                    🖨️ Print QR Code
-                </div>`;
-            }
-            
-            // Call customer
-            if (customerPhone) {
-                menuItems += `<div class="quick-action-item" onclick="window.callCustomer('${customerPhone}'); window.closeQuickActions();">
-                    📞 Call Customer
-                </div>`;
-            }
-            
-            // View details
-            menuItems += `<div class="quick-action-item" onclick="window.location.href='/employee/order/${orderNumber}/';">
-                👁️ View Details
-            </div>`;
-            
-            // Confirm payment (COD unpaid)
-            if (paymentMethod === 'Cash on Delivery' && !paymentReceived) {
-                menuItems += `<div class="quick-action-item" onclick="window.confirmPayment('${orderNumber}'); window.closeQuickActions();">
-                    💰 Confirm Payment
-                </div>`;
-            }
-            
-            // Copy order number
-            menuItems += `<div class="quick-action-item" onclick="window.copyOrderNumber('${orderNumber}'); window.closeQuickActions();">
-                📋 Copy Order Number
-            </div>`;
-            
-            quickActionsMenu.innerHTML = menuItems;
-            document.body.appendChild(quickActionsMenu);
-            
-            // Close on outside click
-            setTimeout(() => {
-                document.addEventListener('click', window.closeQuickActions, { once: true });
-            }, 100);
-        };
-        
-        // PHASE 3: Close Quick Actions
-        window.closeQuickActions = function() {
-            if (quickActionsMenu) {
-                quickActionsMenu.remove();
-                quickActionsMenu = null;
-            }
-        };
-        
-        // PHASE 3: Call Customer
-        window.callCustomer = function(phone) {
-            const cleanPhone = phone.replace(/\D/g, '');
-            window.location.href = `tel:${cleanPhone}`;
-        };
-        
-        // PHASE 3: Copy Order Number
-        window.copyOrderNumber = function(orderNumber) {
-            navigator.clipboard.writeText(orderNumber).then(() => {
-                showToast(`Order number ${orderNumber} copied to clipboard`, 'success', 2000);
-            }).catch(() => {
-                const textarea = document.createElement('textarea');
-                textarea.value = orderNumber;
-                document.body.appendChild(textarea);
-                textarea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textarea);
-                showToast(`Order number ${orderNumber} copied to clipboard`, 'success', 2000);
-            });
-        };
-        
-        // PHASE 2: Keyboard Shortcuts
-        function showKeyboardHint() {
-            const hint = document.getElementById('keyboardHint');
-            if (hint) {
-                hint.classList.add('show');
-                clearTimeout(keyboardHintTimeout);
-                keyboardHintTimeout = setTimeout(() => {
-                    hint.classList.remove('show');
-                }, 5000);
-            }
         }
         
-        document.addEventListener('keydown', function(e) {
-            // Don't trigger shortcuts when typing in inputs
-            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
-                return;
-            }
-            
-            // Show hint on first use
-            if (!localStorage.getItem('keyboardHintsShown')) {
-                showKeyboardHint();
-                localStorage.setItem('keyboardHintsShown', 'true');
-            }
-            
-            // S = Start Preparing
-            if (e.key === 's' || e.key === 'S') {
-                e.preventDefault();
-                const selected = document.querySelectorAll('.order-checkbox:checked');
-                if (selected.length > 0) {
-                    const sectionId = selected[0].closest('[id^="orders"]')?.id;
-                    if (sectionId === 'ordersToPrepare') {
-                        window.bulkUpdateStatus('ordersToPrepare', 'preparing', null);
-                    }
-                } else {
-                    const firstOrder = document.querySelector('#ordersToPrepare .order-card');
-                    if (firstOrder) {
-                        const orderNumber = firstOrder.getAttribute('data-order');
-                        window.updateStatus(orderNumber, 'preparing');
-                    }
-                }
-            }
-            
-            // R = Mark Ready
-            if (e.key === 'r' || e.key === 'R') {
-                e.preventDefault();
-                const selected = document.querySelectorAll('.order-checkbox:checked');
-                if (selected.length > 0) {
-                    const sectionId = selected[0].closest('[id^="orders"]')?.id;
-                    if (sectionId === 'ordersPreparing') {
-                        window.bulkUpdateStatus('ordersPreparing', 'ready_for_delivery', null);
-                    }
-                } else {
-                    const firstOrder = document.querySelector('#ordersPreparing .order-card');
-                    if (firstOrder) {
-                        const orderNumber = firstOrder.getAttribute('data-order');
-                        window.updateStatus(orderNumber, 'ready_for_delivery');
-                    }
-                }
-            }
-            
-            // D = Out for Delivery
-            if (e.key === 'd' || e.key === 'D') {
-                e.preventDefault();
-                const selected = document.querySelectorAll('.order-checkbox:checked');
-                if (selected.length > 0) {
-                    const sectionId = selected[0].closest('[id^="orders"]')?.id;
-                    if (sectionId === 'ordersReady') {
-                        window.bulkUpdateStatus('ordersReady', 'out_for_delivery', null);
-                    }
-                } else {
-                    const firstOrder = document.querySelector('#ordersReady .order-card');
-                    if (firstOrder) {
-                        const orderNumber = firstOrder.getAttribute('data-order');
-                        window.updateStatus(orderNumber, 'out_for_delivery');
-                    }
-                }
-            }
-            
-            // C = Confirm Payment
-            if (e.key === 'c' || e.key === 'C') {
-                e.preventDefault();
-                const selected = document.querySelectorAll('.order-checkbox:checked');
-                if (selected.length > 0) {
-                    const firstSelected = selected[0];
-                    const orderNumber = firstSelected.getAttribute('data-order');
-                    confirmPayment(orderNumber);
-                } else {
-                    const codOrders = document.querySelectorAll('[data-order]');
-                    for (let card of codOrders) {
-                        const confirmBtn = card.querySelector('button[onclick*="confirmPayment"]');
-                        if (confirmBtn) {
-                            const orderNumber = card.getAttribute('data-order');
-                            confirmPayment(orderNumber);
-                            break;
-                        }
-                    }
-                }
-            }
-            
-            // Escape = Clear selections
-            if (e.key === 'Escape') {
-                document.querySelectorAll('.order-checkbox:checked').forEach(cb => {
-                    cb.checked = false;
-                    const card = cb.closest('.order-card');
-                    if (card) card.classList.remove('selected');
-                });
-                window.updateBulkActions();
-            }
-        });
-        
-        // Update bulk actions when checkboxes change
-        document.addEventListener('change', function(e) {
-            if (e.target.classList.contains('order-checkbox')) {
-                const card = e.target.closest('.order-card');
-                if (card) {
-                    if (e.target.checked) {
-                        card.classList.add('selected');
-                    } else {
-                        card.classList.remove('selected');
-                    }
-                }
-                window.updateBulkActions();
-            }
-        });
-        
-        // ========== EXISTING CODE CONTINUES ==========
-        let lastOrderCount = {{ total_to_prepare }};
-        let websocket = null;
-        let reconnectAttempts = 0;
-        const maxReconnectAttempts = 5;
-        
-        // WebSocket connection
-        function connectWebSocket() {
-            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const wsUrl = `${protocol}//${window.location.host}/ws/orders/`;
-            
-            console.log('Attempting WebSocket connection to:', wsUrl);
-            updateWSStatus('connecting', '🔄 Connecting...');
-            
-            try {
-                websocket = new WebSocket(wsUrl);
-                
-                // Set connection timeout
-                const connectionTimeout = setTimeout(() => {
-                    if (websocket && websocket.readyState === WebSocket.CONNECTING) {
-                        console.error('WebSocket connection timeout');
-                        websocket.close();
-                        updateWSStatus('disconnected', '🔴 Connection timeout');
-                        startPolling();
-                    }
-                }, 10000); // 10 second timeout
-                
-                websocket.onopen = function(e) {
-                    clearTimeout(connectionTimeout);
-                    console.log('WebSocket connected successfully');
-                    updateWSStatus('connected', '🟢 Real-time: ON');
-                    reconnectAttempts = 0;
-                    
-                    // Send ping every 30 seconds to keep connection alive
-                    if (window.pingInterval) {
-                        clearInterval(window.pingInterval);
-                    }
-                    window.pingInterval = setInterval(() => {
-                        if (websocket && websocket.readyState === WebSocket.OPEN) {
-                            websocket.send(JSON.stringify({ type: 'ping' }));
-                        }
-                    }, 30000);
-                };
-                
-                websocket.onmessage = function(e) {
-                    try {
-                        const data = JSON.parse(e.data);
-                        handleWebSocketMessage(data);
-                    } catch (err) {
-                        console.error('Error parsing WebSocket message:', err);
-                    }
-                };
-                
-                websocket.onerror = function(e) {
-                    clearTimeout(connectionTimeout);
-                    console.error('WebSocket error:', e);
-                    console.error('WebSocket readyState:', websocket ? websocket.readyState : 'null');
-                    updateWSStatus('disconnected', '🔴 Real-time: ERROR');
-                };
-                
-                websocket.onclose = function(e) {
-                    clearTimeout(connectionTimeout);
-                    console.log('WebSocket closed. Code:', e.code, 'Reason:', e.reason);
-                    updateWSStatus('disconnected', '🔴 Real-time: OFF');
-                    
-                    // Attempt to reconnect
-                    if (reconnectAttempts < maxReconnectAttempts) {
-                        reconnectAttempts++;
-                        console.log(`Reconnecting... (${reconnectAttempts}/${maxReconnectAttempts})`);
-                        setTimeout(() => {
-                            connectWebSocket();
-                        }, 3000);
-                    } else {
-                        // Fallback to polling
-                        console.log('Max reconnection attempts reached. Falling back to polling.');
-                        startPolling();
-                    }
-                };
-            } catch (error) {
-                console.error('WebSocket connection error:', error);
-                updateWSStatus('disconnected', '🔴 Real-time: ERROR');
-                startPolling();
-            }
-        }
-        
-        function updateWSStatus(status, text) {
-            const statusEl = document.getElementById('wsStatus');
-            const textEl = document.getElementById('wsStatusText');
-            const refreshEl = document.getElementById('autoRefresh');
-            
-            if (statusEl) {
-                if (status === 'connected') {
-                    statusEl.textContent = '🟢';
-                } else if (status === 'disconnected') {
-                    statusEl.textContent = '🔴';
-                } else if (status === 'connecting') {
-                    statusEl.textContent = '🔄';
-                } else {
-                    statusEl.textContent = '🔄';
-                }
-            }
-            if (textEl) textEl.textContent = text;
-            if (refreshEl) {
-                refreshEl.className = 'auto-refresh ' + status;
-            }
-        }
-        
-        function handleWebSocketMessage(data) {
-            console.log('WebSocket message received:', data.type, data);
-            if (data.type === 'new_order') {
-                handleNewOrder(data.order);
-            } else if (data.type === 'status_changed') {
-                console.log('Processing status_changed message:', data.order.order_number, data.old_status, '->', data.new_status);
-                handleStatusChanged(data.order, data.old_status, data.new_status);
-            } else if (data.type === 'payment_confirmed') {
-                console.log('Payment confirmed for order:', data.order.order_number);
-                handlePaymentConfirmed(data.order);
-            } else if (data.type === 'pong') {
-                // Keep-alive response
-            }
-        }
-        
-        function handlePaymentConfirmed(order) {
-            console.log('Payment confirmed for order:', order.order_number, 'Payment received:', order.payment_received, 'Customer received:', order.customer_received);
-            
-            // Find the order card in any section
-            const orderCard = document.querySelector(`[data-order="${order.order_number}"]`);
-            
-            if (orderCard) {
-                // Update data attribute for filtering and other logic
-                // payment_received should be True from the WebSocket message
-                const paymentReceived = order.payment_received === true || order.payment_received === 'true' || order.payment_received === 1;
-                orderCard.setAttribute('data-payment-received', paymentReceived ? 'true' : 'false');
-                
-                console.log('Updated data-payment-received to:', paymentReceived ? 'true' : 'false');
-                
-                // Update payment status display
-                const paymentStatusItems = orderCard.querySelectorAll('.info-item');
-                let paymentStatusUpdated = false;
-                
-                paymentStatusItems.forEach(item => {
-                    const label = item.querySelector('.info-label');
-                    if (label && label.textContent.trim() === 'Payment Status') {
-                        const valueEl = item.querySelector('.info-value');
-                        if (valueEl) {
-                            if (paymentReceived) {
-                                const paymentDate = order.payment_received_at ? 
-                                    new Date(order.payment_received_at).toLocaleDateString('en-US', {month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'}) : '';
-                                
-                                valueEl.innerHTML = '<span style="color: #28a745; font-weight: 600;">✅ Paid</span>' +
-                                    (paymentDate ? '<div style="font-size: 11px; color: #666; margin-top: 2px;">' + paymentDate + '</div>' : '');
-                                paymentStatusUpdated = true;
-                                console.log('Payment status updated to Paid');
-                            } else {
-                                valueEl.innerHTML = '<span style="color: #dc3545; font-weight: 600;">⏳ Not Paid</span>';
-                            }
-                        }
-                    }
-                });
-                
-                // If payment status section doesn't exist but should (COD order), refresh the order
-                if (!paymentStatusUpdated && order.payment_method === 'Cash on Delivery' && paymentReceived) {
-                    console.log('Payment status section not found, refreshing order card...');
-                    // The payment status should be there for COD orders, so refresh might be needed
-                    setTimeout(() => {
-                        refreshOrders();
-                        updateCounters();
-                    }, 500);
-                } else if (paymentStatusUpdated) {
-                    // Payment status was successfully updated - just update counters, don't refresh
-                    // (refreshing would overwrite the manual update if API hasn't synced yet)
-                    updateCounters();
-                    console.log('Payment status updated successfully, skipping refresh to preserve update');
-                }
-                
-                // Update customer received status if present
-                paymentStatusItems.forEach(item => {
-                    const label = item.querySelector('.info-label');
-                    if (label && label.textContent === 'Customer Received') {
-                        const valueEl = item.querySelector('.info-value');
-                        if (valueEl && order.customer_received) {
-                            valueEl.innerHTML = '<span style="color: #28a745; font-weight: 600; font-size: 16px;">✅ Received</span>' +
-                                (order.customer_received_at ? '<div style="font-size: 11px; color: #666; margin-top: 2px;">' +
-                                new Date(order.customer_received_at).toLocaleDateString('en-US', {month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'}) +
-                                '</div>' : '');
-                        }
-                    }
-                });
-                
-                // Remove confirm payment button if exists
-                const confirmBtn = orderCard.querySelector('button[onclick*="confirmPayment"]');
-                if (confirmBtn) {
-                    confirmBtn.remove();
-                }
-                
-                // Update customer received status display if present (only if customer actually received)
-                // NOTE: Payment confirmation does NOT mean customer received - these are separate events
-                if (order.customer_received) {
-                    paymentStatusItems.forEach(item => {
-                        const label = item.querySelector('.info-label');
-                        if (label && label.textContent === 'Customer Received') {
-                            const valueEl = item.querySelector('.info-value');
-                            if (valueEl) {
-                                const receivedDate = order.customer_received_at ? 
-                                    new Date(order.customer_received_at).toLocaleDateString('en-US', {month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'}) : '';
-                                valueEl.innerHTML = '<span style="color: #28a745; font-weight: 600; font-size: 16px;">✅ Received</span>' +
-                                    (receivedDate ? '<div style="font-size: 11px; color: #666; margin-top: 2px;">' + receivedDate + '</div>' : '');
-                            }
-                        }
-                    });
-                    
-                    // Update data attribute but keep order in current section
-                    orderCard.setAttribute('data-customer-received', 'true');
-                } else {
-                    // Customer hasn't received yet - keep showing "Not Received"
-                    paymentStatusItems.forEach(item => {
-                        const label = item.querySelector('.info-label');
-                        if (label && label.textContent === 'Customer Received') {
-                            const valueEl = item.querySelector('.info-value');
-                            if (valueEl) {
-                                valueEl.innerHTML = '<span style="color: #dc3545; font-weight: 600; font-size: 16px;">Not Received</span>';
-                            }
-                        }
-                    });
-                    orderCard.setAttribute('data-customer-received', 'false');
-                }
-                
-                console.log(`Order ${order.order_number} payment confirmed - Payment: Paid, Customer Received: ${order.customer_received ? 'Yes' : 'No'}`);
-            } else {
-                // Order card not found - this shouldn't happen for payment confirmation
-                // but if it does, just log it
-                console.log(`Order card not found for ${order.order_number} during payment confirmation`);
-            }
-            
-            // Update counters immediately (don't refresh to avoid overwriting manual updates)
-            updateCounters();
-        }
-        
-        function handleNewOrder(order) {
-            console.log('New order received:', order.order_number, 'Customer received:', order.customer_received);
-            
-            // If customer already received this order, don't add it to "To Prepare"
-            // It should only appear in "Customer Received" section
-            if (order.customer_received) {
-                console.log(`Order ${order.order_number} already received by customer, skipping add to To Prepare`);
-                // Check if it should be in Customer Received section
-                const deliveredSection = document.getElementById('ordersDelivered');
-                if (deliveredSection) {
-                    const existingCard = deliveredSection.querySelector(`[data-order="${order.order_number}"]`);
-                    if (!existingCard) {
-                        addOrderCard('ordersDelivered', order, false, false);
-                        updateCounters();
-                    }
-                }
-                return;
-            }
-            
-            // Play sound
-            playNotificationSound();
-            
-            // Show popup alert
-            showNewOrderPopup(order.order_number);
-            
-            // Show alert banner
-            showNewOrderAlert();
-            
-            // Add order card to "Orders to Prepare" section
-            addOrderCard('ordersToPrepare', order, true, true);
-            
-            // Update counters
-            updateCounters();
-        }
-        
-        function handleStatusChanged(order, oldStatus, newStatus) {
-            console.log(`Order ${order.order_number} status changed: ${oldStatus} -> ${newStatus}`);
-            
-            // Find and remove order from old section
-            const oldSection = getSectionForStatus(oldStatus);
-            const newSection = getSectionForStatus(newStatus);
-            
-            // Special handling for delivered orders
-            // ALL delivered orders should appear in "Customer Received" section
-            if (newStatus === 'delivered') {
-                // Remove from old section if exists
-                if (oldSection) {
-                    const existingCard = oldSection.querySelector(`[data-order="${order.order_number}"]`);
-                    if (existingCard) {
-                        existingCard.remove();
-                        if (oldSection.children.length === 0) {
-                            oldSection.innerHTML = '<div class="empty-state"><div class="empty-state-icon">✅</div><p>No orders</p></div>';
-                        }
-                    }
-                }
-                
-                // Add ALL delivered orders to "Customer Received" section (regardless of customer_received status)
-                const deliveredSection = document.getElementById('ordersDelivered');
-                if (deliveredSection) {
-                    // Check if order already exists in delivered section to avoid duplicates
-                    const existingInDelivered = deliveredSection.querySelector(`[data-order="${order.order_number}"]`);
-                    if (!existingInDelivered) {
-                        // Ensure order has all required fields for createOrderCard
-                        if (!order.total_amount && order.total) {
-                            order.total_amount = order.total;
-                        }
-                        if (!order.items) {
-                            order.items = [];
-                        }
-                        if (!order.status_display) {
-                            order.status_display = 'Delivered';
-                        }
-                        // Add to delivered section
-                        console.log('Calling addOrderCard with order:', order);
-                        addOrderCard('ordersDelivered', order, false, false);
-                        console.log(`Added order ${order.order_number} to Customer Received section (status: delivered)`);
-                        // Force counter update and verify DOM
-                        setTimeout(() => {
-                            const verifyCard = deliveredSection.querySelector(`[data-order="${order.order_number}"]`);
-                            if (verifyCard) {
-                                console.log(`✅ Verified: Order ${order.order_number} is in DOM`);
-                            } else {
-                                console.error(`❌ ERROR: Order ${order.order_number} NOT found in DOM after insertion!`);
-                            }
-                            updateCounters();
-                        }, 200);
-                    } else {
-                        console.log(`Order ${order.order_number} already exists in delivered section`);
-                    }
-                } else {
-                    console.error('ordersDelivered section not found in DOM');
-                }
-            } else if (newSection) {
-                // For other status changes, use normal flow
-                // BUT: Don't add orders with customer_received=True to any section except "Customer Received"
-                if (order.customer_received && newSection.id !== 'ordersDelivered') {
-                    console.log(`Order ${order.order_number} has customer_received=True, not adding to ${newSection.id}`);
-                    // Just remove from old section
-                    if (oldSection) {
-                        const existingCard = oldSection.querySelector(`[data-order="${order.order_number}"]`);
-                        if (existingCard) {
-                            existingCard.remove();
-                            if (oldSection.children.length === 0) {
-                                oldSection.innerHTML = '<div class="empty-state"><div class="empty-state-icon">✅</div><p>No orders</p></div>';
-                            }
-                        }
-                    }
-                    // Check if it should be in Customer Received section
-                    const deliveredSection = document.getElementById('ordersDelivered');
-                    if (deliveredSection) {
-                        const existingInDelivered = deliveredSection.querySelector(`[data-order="${order.order_number}"]`);
-                        if (!existingInDelivered) {
-                            addOrderCard('ordersDelivered', order, false, false);
-                            updateCounters();
-                        }
-                    }
-                } else if (oldSection) {
-                    moveOrderCard(oldSection, newSection, order, newStatus);
-                } else {
-                    // Order not in old section, just add to new section
-                    addOrderCard(newSection.id, order, newStatus === 'preparing' || newStatus === 'pending' || newStatus === 'confirmed', false);
-                }
-            } else if (oldSection) {
-                // New section is null and not delivered, just remove from old section
-                const existingCard = oldSection.querySelector(`[data-order="${order.order_number}"]`);
-                if (existingCard) {
-                    existingCard.remove();
-                    if (oldSection.children.length === 0) {
-                        oldSection.innerHTML = '<div class="empty-state"><div class="empty-state-icon">✅</div><p>No orders</p></div>';
-                    }
-                }
-            }
-            
-            // Update counters
-            updateCounters();
-        }
-        
-        function getSectionForStatus(status) {
-            const statusMap = {
-                'pending': 'ordersToPrepare',
-                'confirmed': 'ordersToPrepare',
-                'preparing': 'ordersPreparing',
-                'ready_for_delivery': 'ordersReady',
-                'out_for_delivery': 'ordersOut',
-                'delivered': 'ordersDelivered' // Show in Customer Received section
-            };
-            
-            const sectionId = statusMap[status];
-            return sectionId ? document.getElementById(sectionId) : null;
-        }
-        
-        function addOrderCard(sectionId, order, showItems, isNew) {
-            const section = document.getElementById(sectionId);
-            if (!section) {
-                console.error(`Section ${sectionId} not found in DOM`);
-                return;
-            }
-            
-            // Check if order already exists in this section to prevent duplicates
-            const existingCard = section.querySelector(`[data-order="${order.order_number}"]`);
-            if (existingCard) {
-                console.log(`Order ${order.order_number} already exists in ${sectionId}, skipping duplicate`);
-                return;
-            }
-            
-            console.log(`Adding order card to ${sectionId}:`, order.order_number);
-            
-            // Remove empty state if exists
-            const emptyState = section.querySelector('.empty-state');
-            if (emptyState) {
-                console.log('Removing empty state from', sectionId);
-                emptyState.remove();
-            }
-            
-            // Create order card
-            const card = createOrderCard(order, showItems, isNew);
-            
-            if (!card) {
-                console.error('createOrderCard returned null/undefined for order:', order.order_number);
-                return;
-            }
-            
-            console.log('Created card element, inserting into DOM');
-            
-            // Add to top of section with animation
-            if (section.firstChild) {
-                section.insertBefore(card, section.firstChild);
-            } else {
-                section.appendChild(card);
-            }
-            
-            console.log(`Order card ${order.order_number} added to ${sectionId}. Section now has ${section.children.length} children`);
-            
-            // Trigger animation
-            setTimeout(() => {
-                card.classList.add('new');
-            }, 10);
-            
-            // Remove new class after 10 seconds
-            setTimeout(() => {
-                card.classList.remove('new');
-            }, 10000);
-        }
-        
-        function moveOrderCard(fromSection, toSection, order, newStatus) {
-            // Find existing card
-            const existingCard = fromSection.querySelector(`[data-order="${order.order_number}"]`);
-            
-            // Determine if should show items in new section
-            const showItems = newStatus === 'preparing' || newStatus === 'pending' || newStatus === 'confirmed';
-            
-            if (existingCard) {
-                // Mark as moving
-                existingCard.classList.add('moving');
-                
-                // Remove from old section
-                setTimeout(() => {
-                    existingCard.remove();
-                    
-                    // Check if old section is now empty
-                    if (fromSection.children.length === 0) {
-                        fromSection.innerHTML = '<div class="empty-state"><div class="empty-state-icon">✅</div><p>No orders</p></div>';
-                    }
-                    
-                    // Add to new section
-                    addOrderCard(toSection.id, order, showItems, false);
-                }, 300);
-            } else {
-                // Card not found in old section, just add to new section
-                // Check if order already exists in new section to avoid duplicates
-                const existingInNew = toSection.querySelector(`[data-order="${order.order_number}"]`);
-                if (!existingInNew) {
-                    addOrderCard(toSection.id, order, showItems, false);
-                }
-            }
-        }
-        
-        // PHASE 3: Get Priority Classes
-        function getPriorityClasses(order) {
-            const classes = [];
-            const created = new Date(order.created_at);
-            const now = new Date();
-            const hoursOld = (now - created) / (1000 * 60 * 60);
-            const total = parseFloat(order.total_amount || order.total || 0);
-            
-            // Urgent: old orders (> 4 hours) or high value (> $100)
-            if (hoursOld > 4 || total > 100) {
-                classes.push('urgent');
-            }
-            // High value: > $50
-            if (total > 50) {
-                classes.push('high-value');
-            }
-            // Old: > 2 hours
-            if (hoursOld > 2) {
-                classes.push('old-order');
-            }
-            
-            return classes.join(' ');
-        }
-        
-        // PHASE 3: Get Priority Badge
-        function getPriorityBadge(order) {
-            const created = new Date(order.created_at);
-            const now = new Date();
-            const hoursOld = (now - created) / (1000 * 60 * 60);
-            const total = parseFloat(order.total_amount || order.total || 0);
-            
-            if (hoursOld > 4) {
-                return '<span class="priority-badge urgent">⚠️ Urgent</span>';
-            } else if (total > 100) {
-                return '<span class="priority-badge high-value">💰 High Value</span>';
-            } else if (hoursOld > 2) {
-                return '<span class="priority-badge old">⏰ Old</span>';
-            }
-            return '';
-        }
-        
-        function createOrderCard(order, showItems, isNew) {
-            const card = document.createElement('div');
-            const priorityClasses = getPriorityClasses(order);
-            card.className = `order-card${isNew ? ' new' : ''} ${priorityClasses}`;
-            card.setAttribute('data-order', order.order_number);
-            card.setAttribute('data-customer-name', (order.customer_name || '').toLowerCase());
-            card.setAttribute('data-customer-phone', (order.customer_phone || '').toLowerCase());
-            card.setAttribute('data-payment-method', order.payment_method || '');
-            card.setAttribute('data-payment-received', order.payment_received ? 'true' : 'false');
-            card.setAttribute('data-total', order.total_amount || order.total || '0');
-            card.setAttribute('data-created-at', order.created_at);
-            
-            const itemsHtml = showItems && order.items ? order.items.map(item => 
-                `<li><span class="item-name">${item.product_name}</span><span class="item-qty">x${item.quantity}</span></li>`
-            ).join('') : '';
-            
-            const itemsSection = showItems && itemsHtml ? 
-                `<div class="order-items"><div class="order-items-title">📦 Products to Prepare:</div><ul class="item-list">${itemsHtml}</ul></div>` : '';
-            
-            const actionsHtml = getActionsHtml(order);
-            const timeAgo = getTimeAgo(order.created_at);
-            const priorityBadge = getPriorityBadge(order);
-            
-            card.innerHTML = `
-                <input type="checkbox" class="order-checkbox" data-order="${order.order_number}" onchange="window.updateBulkActions()">
-                <button class="quick-actions-btn" onclick="window.showQuickActions(event, '${order.order_number}')" title="Quick Actions">⋯</button>
-                <div class="order-header">
-                    <div>
-                        <div class="order-number">#${order.order_number}${priorityBadge}</div>
-                        <div class="time-ago">${timeAgo}</div>
-                    </div>
-                    <span class="order-status status-${order.status}">${order.status_display}</span>
-                </div>
-                <div class="order-info">
-                    <div class="info-item">
-                        <span class="info-label">Customer</span>
-                        <span class="info-value">${order.customer_name}</span>
-                    </div>
-                    <div class="info-item info-item-phone">
-                        <span class="info-label">Phone</span>
-                        <span class="info-value">${order.customer_phone}</span>
-                    </div>
-                    ${order.customer_address ? `
-                    <div class="info-item info-item-address">
-                        <span class="info-label">Address</span>
-                        <span class="info-value">${order.customer_address}</span>
-                    </div>
-                    ` : ''}
-                    ${order.customer_province ? `
-                    <div class="info-item">
-                        <span class="info-label">Province</span>
-                        <span class="info-value">${order.customer_province}</span>
-                    </div>
-                    ` : ''}
-                    <div class="info-item">
-                        <span class="info-label">Total</span>
-                        <span class="info-value">$${order.total_amount}</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Payment</span>
-                        <span class="info-value">${order.payment_method}</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Customer Received</span>
-                        <span class="info-value">
-                            ${order.customer_received ? 
-                                '<span style="color: #28a745; font-weight: 600; font-size: 16px;">✅ Received</span>' + 
-                                (order.customer_received_at ? 
-                                    '<div style="font-size: 11px; color: #666; margin-top: 2px;">' + 
-                                    new Date(order.customer_received_at).toLocaleDateString('en-US', {month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'}) + 
-                                    '</div>' : '') : 
-                                '<span style="color: #dc3545; font-weight: 600; font-size: 16px;">Not Received</span>'}
-                        </span>
-                    </div>
-                    ${order.payment_method === 'Cash on Delivery' ? `
-                    <div class="info-item">
-                        <span class="info-label">Payment Status</span>
-                        <span class="info-value">
-                            ${order.payment_received ? 
-                                '<span style="color: #28a745; font-weight: 600;">✅ Paid</span>' : 
-                                '<span style="color: #dc3545; font-weight: 600;">⏳ Not Paid</span>'}
-                        </span>
-                    </div>` : ''}
-                </div>
-                ${itemsSection}
-                <div class="order-actions">${actionsHtml}</div>
-            `;
-            
-            return card;
-        }
-        
-        function showNewOrderPopup(orderNumber) {
-            // Create popup
-            const popup = document.createElement('div');
-            popup.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
-                color: white;
-                padding: 20px;
-                border-radius: 12px;
-                box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-                z-index: 1000;
-                animation: slideInRight 0.5s ease;
-                max-width: 300px;
-            `;
-            popup.innerHTML = `
-                <div style="font-size: 18px; font-weight: 700; margin-bottom: 8px;">🔔 New Order!</div>
-                <div style="font-size: 16px;">Order #${orderNumber}</div>
-            `;
-            
-            document.body.appendChild(popup);
-            
-            // Remove after 5 seconds
-            setTimeout(() => {
-                popup.style.animation = 'slideOutRight 0.5s ease';
-                setTimeout(() => popup.remove(), 500);
-            }, 5000);
-        }
-        
+        // Update Counters
         function updateCounters() {
-            // Count orders in each section
-            const counts = {
-                'ordersToPrepare': document.getElementById('ordersToPrepare')?.querySelectorAll('.order-card').length || 0,
-                'ordersPreparing': document.getElementById('ordersPreparing')?.querySelectorAll('.order-card').length || 0,
-                'ordersReady': document.getElementById('ordersReady')?.querySelectorAll('.order-card').length || 0,
-                'ordersOut': document.getElementById('ordersOut')?.querySelectorAll('.order-card').length || 0,
-                'ordersDelivered': document.getElementById('ordersDelivered')?.querySelectorAll('.order-card').length || 0
+            const sections = {
+                'ordersToPrepare': 'statPending',
+                'ordersPreparing': 'statPreparing',
+                'ordersReady': 'statReady',
+                'ordersOut': 'statOut',
+                'ordersDelivered': 'statDelivered'
             };
             
-            // Update stat numbers
-            document.getElementById('statPending').textContent = counts.ordersToPrepare;
-            document.getElementById('statPreparing').textContent = counts.ordersPreparing;
-            document.getElementById('statReady').textContent = counts.ordersReady;
-            document.getElementById('statOut').textContent = counts.ordersOut;
-            document.getElementById('statDelivered').textContent = counts.ordersDelivered;
-            
-            // Update section counts
-            document.getElementById('countToPrepare').textContent = `(${counts.ordersToPrepare})`;
-            document.getElementById('countPreparing').textContent = `(${counts.ordersPreparing})`;
-            document.getElementById('countReady').textContent = `(${counts.ordersReady})`;
-            document.getElementById('countOut').textContent = `(${counts.ordersOut})`;
-            document.getElementById('countDelivered').textContent = `(${counts.ordersDelivered})`;
+            Object.entries(sections).forEach(([sectionId, statId]) => {
+                const section = document.getElementById(sectionId);
+                const stat = document.getElementById(statId);
+                const count = document.getElementById('count' + sectionId.replace('orders', ''));
+                
+                if (section && stat) {
+                    const num = section.querySelectorAll('.order-card').length;
+                    stat.textContent = num;
+                    if (count) count.textContent = `(${num})`;
+                }
+            });
         }
         
-        // Fallback polling (if WebSocket fails)
-        let refreshInterval;
-        function startPolling() {
-            updateWSStatus('disconnected', '🔄 Polling: ON');
-            refreshInterval = setInterval(refreshOrders, 3000);
-        }
-        
+        // Refresh Orders
         function refreshOrders() {
             fetch('/employee/api/')
-                .then(response => response.json())
+                .then(r => r.json())
                 .then(data => {
                     if (!data.success) return;
-                    
-                    // Check for new orders
-                    const newPending = data.stats.total_to_prepare;
-                    if (newPending > lastOrderCount) {
-                        showNewOrderAlert();
-                        playNotificationSound();
-                    }
-                    
-                    lastOrderCount = newPending;
                     
                     // Update stats
                     document.getElementById('statPending').textContent = data.stats.total_to_prepare;
@@ -2130,172 +725,176 @@
                     document.getElementById('countReady').textContent = `(${data.stats.total_ready})`;
                     document.getElementById('countOut').textContent = `(${data.stats.total_out})`;
                     
-                    // Update order sections
-                    updateOrdersSection('ordersToPrepare', data.orders_to_prepare, true);
-                    updateOrdersSection('ordersPreparing', data.orders_preparing, true);
-                    updateOrdersSection('ordersReady', data.orders_ready, false);
-                    updateOrdersSection('ordersOut', data.orders_out, false);
+                    // Update sections
+                    updateSection('ordersToPrepare', data.orders_to_prepare, true);
+                    updateSection('ordersPreparing', data.orders_preparing, true);
+                    updateSection('ordersReady', data.orders_ready, false);
+                    updateSection('ordersOut', data.orders_out, false);
+                    
                     if (data.orders_delivered) {
-                        updateOrdersSection('ordersDelivered', data.orders_delivered, false);
+                        updateSection('ordersDelivered', data.orders_delivered, false);
                         document.getElementById('statDelivered').textContent = data.orders_delivered.length;
                         document.getElementById('countDelivered').textContent = `(${data.orders_delivered.length})`;
                     }
                 })
-                .catch(error => {
-                    console.error('Error refreshing orders:', error);
-                });
+                .catch(err => console.error('Refresh error:', err));
         }
         
-        function updateOrdersSection(containerId, orders, showItems) {
+        window.refreshOrders = refreshOrders;
+        
+        function updateSection(containerId, orders, showItems) {
             const container = document.getElementById(containerId);
             if (!container) return;
             
-            // IMPORTANT: If this is NOT the "Customer Received" section, remove any orders with customer_received=True
-            // Orders with customer_received=True should ONLY appear in "Customer Received" section
-            if (containerId !== 'ordersDelivered') {
-                const allCards = container.querySelectorAll('.order-card');
-                allCards.forEach(card => {
-                    const orderNumber = card.getAttribute('data-order');
-                    // Check if this order has customer_received=True by looking at the order data
-                    // We'll check all sections for orders with customer_received and remove them
-                    const customerReceivedEl = card.querySelector('.info-item .info-label');
-                    if (customerReceivedEl && customerReceivedEl.textContent === 'Customer Received') {
-                        const valueEl = customerReceivedEl.nextElementSibling;
-                        if (valueEl && valueEl.innerHTML.includes('✅ Received')) {
-                            console.log(`Removing order ${orderNumber} from ${containerId} - customer already received`);
-                            card.remove();
-                        }
-                    }
-                });
-            }
-            
-            // Get existing order numbers using data-order attribute (more reliable)
-            const currentOrderNumbers = Array.from(container.querySelectorAll('.order-card')).map(
-                card => card.getAttribute('data-order')
-            ).filter(Boolean); // Remove any null/undefined values
-            
-            // For all sections, merge instead of replace to preserve WebSocket-added cards
-            // Update existing cards or add new ones
-            orders.forEach(order => {
-                // For "Customer Received" section: Show ALL delivered orders (status='delivered')
-                // For other sections: Don't show delivered orders (they belong in "Customer Received")
-                if (containerId === 'ordersDelivered') {
-                    // Only show orders with status='delivered' in this section
-                    if (order.status !== 'delivered') {
-                        return; // Skip non-delivered orders
-                    }
-                } else {
-                    // For other sections: Don't show delivered orders or orders with customer_received=True
-                    if (order.status === 'delivered' || order.customer_received) {
-                        return; // Don't add to this section
-                    }
-                }
-                
-                const existingCard = container.querySelector(`[data-order="${order.order_number}"]`);
-                if (existingCard) {
-                    // Update existing card's payment status and other attributes
-                    existingCard.setAttribute('data-payment-received', order.payment_received ? 'true' : 'false');
-                    existingCard.setAttribute('data-total', order.total_amount || order.total || '0');
-                    
-                    // Update customer received status display
-                    existingCard.setAttribute('data-customer-received', order.customer_received ? 'true' : 'false');
-                    const infoItems = existingCard.querySelectorAll('.info-item');
-                    infoItems.forEach(item => {
-                        const label = item.querySelector('.info-label');
-                        if (label && label.textContent.trim() === 'Customer Received') {
-                            const valueEl = item.querySelector('.info-value');
-                            if (valueEl) {
-                                if (order.customer_received) {
-                                    const receivedDate = order.customer_received_at ? 
-                                        new Date(order.customer_received_at).toLocaleDateString('en-US', {month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'}) : '';
-                                    valueEl.innerHTML = '<span style="color: #28a745; font-weight: 600; font-size: 16px;">✅ Received</span>' +
-                                        (receivedDate ? '<div style="font-size: 11px; color: #666; margin-top: 2px;">' + receivedDate + '</div>' : '');
-                                } else {
-                                    valueEl.innerHTML = '<span style="color: #dc3545; font-weight: 600; font-size: 16px;">Not Received</span>';
-                                }
-                            }
-                        }
-                    });
-                    
-                    // Update payment status display if it exists
-                    if (order.payment_method === 'Cash on Delivery') {
-                        infoItems.forEach(item => {
-                            const label = item.querySelector('.info-label');
-                            if (label && label.textContent.trim() === 'Payment Status') {
-                                const valueEl = item.querySelector('.info-value');
-                                if (valueEl) {
-                                    if (order.payment_received) {
-                                        const paymentDate = order.payment_received_at ? 
-                                            new Date(order.payment_received_at).toLocaleDateString('en-US', {month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'}) : '';
-                                        valueEl.innerHTML = '<span style="color: #28a745; font-weight: 600;">✅ Paid</span>' +
-                                            (paymentDate ? '<div style="font-size: 11px; color: #666; margin-top: 2px;">' + paymentDate + '</div>' : '');
-                                    } else {
-                                        valueEl.innerHTML = '<span style="color: #dc3545; font-weight: 600;">⏳ Not Paid</span>';
-                                    }
-                                }
-                            }
-                        });
-                    }
-                } else {
-                    // Card doesn't exist, add it
-                    addOrderCard(containerId, order, showItems, false);
-                }
+            // Get existing order numbers
+            const existingOrders = new Set();
+            container.querySelectorAll('.order-card').forEach(card => {
+                existingOrders.add(card.getAttribute('data-order'));
             });
             
-            // Remove orders that are no longer in the API response (they moved to another section)
-            // But only if we have orders from API (to avoid clearing during initial load)
-            if (orders.length > 0) {
-                currentOrderNumbers.forEach(existingOrderNumber => {
-                    const stillExists = orders.some(order => order.order_number === existingOrderNumber);
-                    if (!stillExists) {
-                        const cardToRemove = container.querySelector(`[data-order="${existingOrderNumber}"]`);
-                        if (cardToRemove) {
-                            cardToRemove.remove();
-                        }
+            // Add new orders that don't exist yet
+            if (orders && orders.length > 0) {
+                orders.forEach(order => {
+                    // Skip if already exists
+                    if (existingOrders.has(order.order_number)) return;
+                    
+                    // For active sections (not delivered), skip orders with customer_received=True
+                    if (containerId !== 'ordersDelivered' && order.customer_received) {
+                        return;
                     }
+                    
+                    // For delivered section, only show delivered status orders
+                    if (containerId === 'ordersDelivered' && order.status !== 'delivered') {
+                        return;
+                    }
+                    
+                    // Add the order card
+                    addOrderCard(containerId, order, showItems);
                 });
             }
             
-            // Show empty state if no orders
-            if (container.querySelectorAll('.order-card').length === 0) {
-                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">✅</div><p>No orders</p></div>';
-            }
-            
-            // Update counters
             updateCounters();
         }
         
-        function getActionsHtml(order) {
-            let html = '';
+        // Build order card HTML from order data
+        function createOrderCardHTML(order, showItems = false) {
+            const items = order.items || [];
+            const itemsHTML = showItems && items.length > 0 ? `
+                <div class="order-items">
+                    <div class="order-items-title">📦 Products to Prepare:</div>
+                    <ul class="item-list">
+                        ${items.map(item => `
+                            <li>
+                                <span class="item-name">${item.product_name || item.name || 'Product'}</span>
+                                <span class="item-qty">x${item.quantity}</span>
+                            </li>
+                        `).join('')}
+                    </ul>
+                </div>
+            ` : '';
             
+            const statusDisplay = order.status_display || order.status || 'Unknown';
+            const statusClass = `status-${order.status || 'pending'}`;
+            
+            // Build actions HTML
+            let actionsHTML = '';
             if (order.status === 'pending' || order.status === 'confirmed') {
-                html += `<button onclick="window.updateStatus('${order.order_number}', 'preparing')" class="btn btn-info">👷 Start Preparing</button>`;
+                actionsHTML = `<button onclick="window.updateStatus('${order.order_number}', 'preparing')" class="btn btn-info">👷 Start Preparing</button>`;
             } else if (order.status === 'preparing') {
                 if (order.payment_method === 'Cash on Delivery') {
-                    html += `<a href="/employee/order/${order.order_number}/print/" target="_blank" class="btn btn-print">🖨️ Print QR</a>`;
+                    actionsHTML += `<a href="/employee/order/${order.order_number}/print/" target="_blank" class="btn btn-print">🖨️ Print QR</a>`;
                 }
-                html += `<button onclick="window.updateStatus('${order.order_number}', 'ready_for_delivery')" class="btn btn-success">✅ Mark Ready</button>`;
+                actionsHTML += `<button onclick="window.updateStatus('${order.order_number}', 'ready_for_delivery')" class="btn btn-success">✅ Mark Ready</button>`;
             } else if (order.status === 'ready_for_delivery') {
-                html += `<button onclick="window.updateStatus('${order.order_number}', 'out_for_delivery')" class="btn btn-warning">🚚 Out for Delivery</button>`;
+                actionsHTML = `<button onclick="window.updateStatus('${order.order_number}', 'out_for_delivery')" class="btn btn-warning">🚚 Out for Delivery</button>`;
             } else if (order.status === 'out_for_delivery') {
                 if (order.payment_method === 'Cash on Delivery' && !order.payment_received) {
-                    const total = order.total_amount || order.total || '0.00';
-                    html += `<button onclick="window.confirmPayment('${order.order_number}')" class="btn btn-primary" style="background: #ffc107; color: #333; font-weight: 700; border: 2px solid #ff9800;">💰 Confirm Payment (${total})</button>`;
+                    actionsHTML += `<button onclick="window.confirmPayment('${order.order_number}')" class="btn btn-primary" style="background: #ffc107; color: #333;">💰 Confirm Payment ($${order.total_amount || order.total || '0'})</button>`;
                 }
-                html += `<button onclick="window.updateStatus('${order.order_number}', 'delivered')" class="btn btn-success">✅ Delivered</button>`;
+                actionsHTML += `<button onclick="window.updateStatus('${order.order_number}', 'delivered')" class="btn btn-success">✅ Delivered</button>`;
             } else if (order.status === 'delivered' && order.payment_method === 'Cash on Delivery' && !order.payment_received) {
-                const total = order.total_amount || order.total || '0.00';
-                html += `<button onclick="window.confirmPayment('${order.order_number}')" class="btn btn-primary" style="background: #ffc107; color: #333; font-weight: 700; border: 2px solid #ff9800;">💰 Confirm Payment (${total})</button>`;
+                actionsHTML = `<button onclick="window.confirmPayment('${order.order_number}')" class="btn btn-primary" style="background: #ffc107; color: #333;">💰 Confirm Payment ($${order.total_amount || order.total || '0'})</button>`;
             }
             
-            return html;
+            const customerReceivedHTML = order.customer_received ? 
+                '<span style="color: #28a745; font-weight: 600;">✅ Received</span>' : 
+                '<span style="color: #dc3545; font-weight: 600;">Not Received</span>';
+            
+            const paymentStatusHTML = order.payment_method === 'Cash on Delivery' ? `
+                <div class="info-item">
+                    <span class="info-label">Payment Status</span>
+                    <span class="info-value">
+                        ${order.payment_received ? 
+                            '<span style="color: #28a745; font-weight: 600;">✅ Paid</span>' : 
+                            '<span style="color: #dc3545; font-weight: 600;">⏳ Not Paid</span>'}
+                    </span>
+                </div>
+            ` : '';
+            
+            const timeAgo = getTimeAgo(order.created_at);
+            
+            return `
+                <div class="order-card" data-order="${order.order_number}" 
+                     data-customer-name="${(order.customer_name || '').toLowerCase()}" 
+                     data-customer-phone="${(order.customer_phone || '').toLowerCase()}" 
+                     data-payment-method="${order.payment_method || ''}" 
+                     data-payment-received="${order.payment_received ? 'true' : 'false'}" 
+                     data-total="${order.total_amount || order.total || '0'}" 
+                     data-created-at="${order.created_at}">
+                    <input type="checkbox" class="order-checkbox" data-order="${order.order_number}" onchange="window.updateBulkActions()">
+                    <button class="quick-actions-btn" onclick="window.showQuickActions(event, '${order.order_number}')" title="Quick Actions">⋯</button>
+                    <div class="order-header">
+                        <div>
+                            <div class="order-number">#${order.order_number}</div>
+                            <div class="time-ago">${timeAgo}</div>
+                        </div>
+                        <span class="order-status ${statusClass}">${statusDisplay}</span>
+                    </div>
+                    <div class="order-info">
+                        <div class="info-item">
+                            <span class="info-label">Customer</span>
+                            <span class="info-value">${order.customer_name || 'N/A'}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Phone</span>
+                            <span class="info-value">${order.customer_phone || 'N/A'}</span>
+                        </div>
+                        ${order.customer_address ? `
+                        <div class="info-item">
+                            <span class="info-label">Address</span>
+                            <span class="info-value">${order.customer_address}</span>
+                        </div>
+                        ` : ''}
+                        ${order.customer_province ? `
+                        <div class="info-item">
+                            <span class="info-label">Province</span>
+                            <span class="info-value">${order.customer_province}</span>
+                        </div>
+                        ` : ''}
+                        <div class="info-item">
+                            <span class="info-label">Total</span>
+                            <span class="info-value">$${order.total_amount || order.total || '0'}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Payment</span>
+                            <span class="info-value">${order.payment_method || 'N/A'}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Customer Received</span>
+                            <span class="info-value">${customerReceivedHTML}</span>
+                        </div>
+                        ${paymentStatusHTML}
+                    </div>
+                    ${itemsHTML}
+                    <div class="order-actions">${actionsHTML}</div>
+                </div>
+            `;
         }
         
         function getTimeAgo(isoString) {
             const time = new Date(isoString);
             const now = new Date();
-            const diff = Math.floor((now - time) / 1000 / 60); // minutes
-            
+            const diff = Math.floor((now - time) / 1000 / 60);
             if (diff < 1) return 'Just now';
             if (diff < 60) return `${diff} min ago`;
             if (diff < 1440) {
@@ -2306,282 +905,377 @@
             return `${days} day${days > 1 ? 's' : ''} ago`;
         }
         
-        function showNewOrderAlert() {
-            const alert = document.getElementById('newOrderAlert');
-            alert.classList.add('show');
-            setTimeout(() => {
-                alert.classList.remove('show');
-            }, 5000);
+        // Real-time WebSocket handlers
+        function getSectionForStatus(status) {
+            const map = {
+                'pending': 'ordersToPrepare',
+                'confirmed': 'ordersToPrepare',
+                'preparing': 'ordersPreparing',
+                'ready_for_delivery': 'ordersReady',
+                'out_for_delivery': 'ordersOut',
+                'delivered': 'ordersDelivered'
+            };
+            return map[status] || null;
         }
         
-        function playNotificationSound() {
-            // Create a simple beep sound
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
+        function addOrderCard(sectionId, order, showItems) {
+            const container = document.getElementById(sectionId);
+            if (!container) return;
             
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
+            // Check if already exists
+            const existing = container.querySelector(`[data-order="${order.order_number}"]`);
+            if (existing) return;
             
-            oscillator.frequency.value = 800;
-            oscillator.type = 'sine';
-            
-            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
-            
-            oscillator.start(audioContext.currentTime);
-            oscillator.stop(audioContext.currentTime + 0.3);
-        }
-        
-        async function updateStatus(orderNumber, newStatus) {
-            // No confirmation needed - update immediately for faster workflow
-            try {
-                const response = await fetch(`/api/employee/order/${orderNumber}/status/`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ status: newStatus })
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    console.log(`Status update successful: ${orderNumber} -> ${newStatus}`);
-                    
-                    // Don't refresh if order is delivered - WebSocket handles it
-                    // Refreshing would overwrite the manually added card
-                    if (newStatus !== 'delivered') {
-                        setTimeout(() => {
-                            refreshOrders();
-                            updateCounters();
-                        }, 300);
-                    } else {
-                        // Just update counters for delivered orders
-                        setTimeout(() => {
-                            updateCounters();
-                        }, 300);
-                    }
-                } else {
-                    showToast('Error: ' + data.message, 'error');
-                }
-            } catch (error) {
-                showToast('Error updating status: ' + error.message, 'error');
-            }
-        }
-        
-        // Make updateStatus globally accessible
-        window.updateStatus = updateStatus;
-        
-        async function confirmPayment(orderNumber) {
-            // Find order details from the card
-            const orderCard = document.querySelector(`[data-order="${orderNumber}"]`);
-            if (!orderCard) {
-                showToast('Order not found on page. Please refresh.', 'warning');
+            // Validate: For active sections, don't add orders with customer_received=True
+            if (sectionId !== 'ordersDelivered' && order.customer_received) {
+                console.log(`Skipping order ${order.order_number} - customer already received`);
                 return;
             }
             
-            // Get order details
-            const customerName = orderCard.querySelector('.info-value')?.textContent || 'N/A';
-            const totalElement = Array.from(orderCard.querySelectorAll('.info-item')).find(item => 
-                item.querySelector('.info-label')?.textContent === 'Total'
-            );
-            const total = totalElement?.querySelector('.info-value')?.textContent || '$0.00';
+            // Validate: For delivered section, only add delivered status orders
+            if (sectionId === 'ordersDelivered' && order.status !== 'delivered') {
+                console.log(`Skipping order ${order.order_number} - not delivered status`);
+                return;
+            }
             
-            // Show confirmation modal
-            const modal = document.createElement('div');
-            modal.id = 'paymentConfirmModal';
-            modal.style.cssText = `
+            // Remove empty state
+            const empty = container.querySelector('.empty-state');
+            if (empty) empty.remove();
+            
+            // Create and add card
+            const temp = document.createElement('div');
+            temp.innerHTML = createOrderCardHTML(order, showItems);
+            const card = temp.firstElementChild;
+            if (card) {
+                container.insertBefore(card, container.firstChild);
+                updateCounters();
+            }
+        }
+        
+        // Sound notification settings
+        let soundEnabled = localStorage.getItem('soundEnabled') !== 'false'; // Default: enabled
+        
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            localStorage.setItem('soundEnabled', soundEnabled);
+            updateSoundButton();
+        }
+        
+        function updateSoundButton() {
+            const icon = document.getElementById('soundIcon');
+            const text = document.getElementById('soundText');
+            if (icon && text) {
+                icon.textContent = soundEnabled ? '🔊' : '🔇';
+                text.textContent = soundEnabled ? 'Sound ON' : 'Sound OFF';
+            }
+        }
+        
+        // Initialize sound button state
+        updateSoundButton();
+        
+        // Sound notification for new orders - improved with better sound
+        function playNewOrderSound() {
+            if (!soundEnabled) return;
+            
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                
+                // Create a pleasant two-tone notification sound
+                const playTone = (frequency, startTime, duration) => {
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.frequency.value = frequency;
+                    oscillator.type = 'sine';
+                    
+                    gainNode.gain.setValueAtTime(0, startTime);
+                    gainNode.gain.linearRampToValueAtTime(0.3, startTime + 0.01);
+                    gainNode.gain.linearRampToValueAtTime(0, startTime + duration);
+                    
+                    oscillator.start(startTime);
+                    oscillator.stop(startTime + duration);
+                };
+                
+                // Play two-tone chime (pleasant notification sound)
+                playTone(800, audioContext.currentTime, 0.15);
+                playTone(1000, audioContext.currentTime + 0.15, 0.2);
+                
+            } catch (error) {
+                console.log('Sound notification not available:', error);
+            }
+        }
+        
+        // Visual notification popup for new orders
+        function showNewOrderNotification(orderNumber) {
+            // Remove existing notification if any
+            const existing = document.getElementById('newOrderNotification');
+            if (existing) existing.remove();
+            
+            const notification = document.createElement('div');
+            notification.id = 'newOrderNotification';
+            notification.style.cssText = `
                 position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0,0,0,0.5);
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                z-index: 10000;
+                top: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+                color: white;
+                padding: 20px 25px;
+                border-radius: 12px;
+                box-shadow: 0 8px 24px rgba(244, 67, 54, 0.4);
+                z-index: 10001;
+                animation: slideInRight 0.4s ease-out;
+                max-width: 350px;
+                cursor: pointer;
             `;
             
-            modal.innerHTML = `
-                <div style="background: white; border-radius: 12px; padding: 25px; max-width: 500px; width: 90%; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
-                    <h2 style="margin: 0 0 20px 0; color: #333; font-size: 22px;">💰 Confirm COD Payment</h2>
-                    
-                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-                        <div style="margin-bottom: 10px;">
-                            <strong>Order Number:</strong> <span style="color: #667eea; font-weight: 600;">#${orderNumber}</span>
-                        </div>
-                        <div style="margin-bottom: 10px;">
-                            <strong>Customer:</strong> ${customerName}
-                        </div>
-                        <div style="margin-bottom: 10px;">
-                            <strong>Total Amount:</strong> <span style="color: #28a745; font-size: 18px; font-weight: 700;">${total}</span>
-                        </div>
+            notification.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="font-size: 32px; animation: bounce 0.5s ease-in-out 3;">🔔</div>
+                    <div style="flex: 1;">
+                        <div style="font-size: 18px; font-weight: 700; margin-bottom: 4px;">New Order!</div>
+                        <div style="font-size: 16px; opacity: 0.95;">Order #${orderNumber}</div>
                     </div>
-                    
-                    <div style="margin-bottom: 20px;">
-                        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">Payment Notes (Optional):</label>
-                        <textarea id="paymentNotes" placeholder="Add any notes about the payment..." style="width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 6px; font-family: inherit; font-size: 14px; min-height: 80px; resize: vertical;" maxlength="500"></textarea>
-                    </div>
-                    
-                    <div style="display: flex; gap: 10px; justify-content: flex-end;">
-                        <button onclick="document.getElementById('paymentConfirmModal').remove()" style="padding: 12px 24px; border: 2px solid #ddd; background: white; border-radius: 6px; cursor: pointer; font-weight: 600; color: #666;">
-                            Cancel
-                        </button>
-                        <button onclick="submitPaymentConfirmation('${orderNumber}')" style="padding: 12px 24px; border: none; background: #28a745; color: white; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 16px;">
-                            ✅ Confirm Payment Received
-                        </button>
-                    </div>
+                    <button onclick="this.closest('#newOrderNotification').remove()" style="background: rgba(255,255,255,0.2); border: none; color: white; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; font-size: 16px; line-height: 1;">×</button>
                 </div>
             `;
             
-            document.body.appendChild(modal);
+            // Add animation keyframes if not exists
+            if (!document.getElementById('notificationStyles')) {
+                const style = document.createElement('style');
+                style.id = 'notificationStyles';
+                style.textContent = `
+                    @keyframes slideInRight {
+                        from {
+                            transform: translateX(100%);
+                            opacity: 0;
+                        }
+                        to {
+                            transform: translateX(0);
+                            opacity: 1;
+                        }
+                    }
+                    @keyframes bounce {
+                        0%, 100% { transform: translateY(0); }
+                        50% { transform: translateY(-10px); }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
             
-            // Close on background click
-            modal.addEventListener('click', (e) => {
-                if (e.target === modal) {
-                    modal.remove();
+            document.body.appendChild(notification);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.style.animation = 'slideInRight 0.4s ease-out reverse';
+                    setTimeout(() => notification.remove(), 400);
+                }
+            }, 5000);
+            
+            // Click to dismiss
+            notification.addEventListener('click', () => {
+                notification.style.animation = 'slideInRight 0.4s ease-out reverse';
+                setTimeout(() => notification.remove(), 400);
+            });
+        }
+        
+        function handleNewOrder(order) {
+            console.log('New order received:', order.order_number);
+            
+            // Don't add if customer already received
+            if (order.customer_received) {
+                console.log('Order already received, skipping');
+                return;
+            }
+            
+            // Play sound notification
+            playNewOrderSound();
+            
+            // Show visual notification
+            showNewOrderNotification(order.order_number);
+            
+            // Show toast
+            showToast(`New order: #${order.order_number}`, 'success');
+            
+            // Add to appropriate section based on status
+            const sectionId = getSectionForStatus(order.status);
+            if (sectionId) {
+                const showItems = order.status === 'preparing' || order.status === 'pending' || order.status === 'confirmed';
+                addOrderCard(sectionId, order, showItems);
+            }
+        }
+        
+        function handleStatusChanged(order, oldStatus, newStatus) {
+            console.log(`Status changed: ${order.order_number} ${oldStatus} -> ${newStatus}`);
+            
+            // Remove from ALL sections first (in case it's in wrong section)
+            ['ordersToPrepare', 'ordersPreparing', 'ordersReady', 'ordersOut', 'ordersDelivered'].forEach(sectionId => {
+                const section = document.getElementById(sectionId);
+                if (section) {
+                    const card = section.querySelector(`[data-order="${order.order_number}"]`);
+                    if (card) {
+                        card.remove();
+                        // Show empty state if needed
+                        if (section.querySelectorAll('.order-card').length === 0) {
+                            section.innerHTML = '<div class="empty-state">No orders</div>';
+                        }
+                    }
                 }
             });
             
-            // Focus on notes textarea
-            setTimeout(() => {
-                document.getElementById('paymentNotes')?.focus();
-            }, 100);
+            // Add to new section (only if order should be in that section)
+            const newSectionId = getSectionForStatus(newStatus);
+            if (newSectionId) {
+                // For active sections, don't add if customer_received=True
+                if (newSectionId !== 'ordersDelivered' && order.customer_received) {
+                    console.log(`Order ${order.order_number} has customer_received=True, not adding to ${newSectionId}`);
+                    // If delivered, add to delivered section instead
+                    if (newStatus === 'delivered') {
+                        addOrderCard('ordersDelivered', order, false);
+                    }
+                    return;
+                }
+                
+                const showItems = newStatus === 'preparing' || newStatus === 'pending' || newStatus === 'confirmed';
+                addOrderCard(newSectionId, order, showItems);
+            }
         }
         
-        async function submitPaymentConfirmation(orderNumber) {
-            const notes = document.getElementById('paymentNotes')?.value.trim() || '';
-            const modal = document.getElementById('paymentConfirmModal');
+        function handlePaymentConfirmed(order) {
+            console.log('Payment confirmed:', order.order_number);
             
-            // Disable button
-            const confirmBtn = modal.querySelector('button[onclick*="submitPaymentConfirmation"]');
-            if (confirmBtn) {
-                confirmBtn.disabled = true;
-                confirmBtn.textContent = 'Processing...';
-            }
-            
-            try {
-                const response = await fetch(`/api/employee/order/${orderNumber}/confirm-payment/`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        notes: notes
-                    })
+            // Update payment status in existing card
+            const card = document.querySelector(`[data-order="${order.order_number}"]`);
+            if (card) {
+                // Update data attribute
+                card.setAttribute('data-payment-received', order.payment_received ? 'true' : 'false');
+                
+                // Find payment status info item (look for label "Payment Status")
+                const infoItems = card.querySelectorAll('.info-item');
+                infoItems.forEach(item => {
+                    const label = item.querySelector('.info-label');
+                    if (label && label.textContent.trim() === 'Payment Status') {
+                        const valueEl = item.querySelector('.info-value');
+                        if (valueEl && order.payment_received) {
+                            const paymentDate = order.payment_received_at ? 
+                                new Date(order.payment_received_at).toLocaleDateString('en-US', {month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'}) : '';
+                            valueEl.innerHTML = '<span style="color: #28a745; font-weight: 600;">✅ Paid</span>' +
+                                (paymentDate ? '<div style="font-size: 11px; color: #666; margin-top: 2px;">' + paymentDate + '</div>' : '');
+                        }
+                    }
                 });
                 
-                const data = await response.json();
+                // Remove confirm payment button
+                const confirmBtn = card.querySelector('button[onclick*="confirmPayment"]');
+                if (confirmBtn) confirmBtn.remove();
+            }
+            updateCounters();
+        }
+        
+        // WebSocket
+        let websocket = null;
+        
+        function connectWebSocket() {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${protocol}//${window.location.host}/ws/orders/`;
+            
+            try {
+                websocket = new WebSocket(wsUrl);
                 
-                if (data.success) {
-                    // Show success message (different message if already confirmed)
-                    const successMsg = document.createElement('div');
-                    successMsg.style.cssText = `
-                        position: fixed;
-                        top: 20px;
-                        right: 20px;
-                        background: ${data.already_confirmed ? '#ffc107' : '#28a745'};
-                        color: ${data.already_confirmed ? '#333' : 'white'};
-                        padding: 15px 20px;
-                        border-radius: 8px;
-                        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-                        z-index: 10001;
-                        font-weight: 600;
-                    `;
-                    successMsg.textContent = data.already_confirmed 
-                        ? `ℹ️ Payment was already confirmed for order #${orderNumber}`
-                        : `✅ Payment confirmed for order #${orderNumber}`;
-                    document.body.appendChild(successMsg);
-                    
-                    // Remove modal
-                    modal.remove();
-                    
-                    // Remove success message after 3 seconds
-                    setTimeout(() => {
-                        successMsg.remove();
-                    }, 3000);
-                    
-                    console.log(`Payment confirmed for order: ${orderNumber}`);
-                    
-                    // Refresh to show updated payment status
-                    setTimeout(() => {
-                        refreshOrders();
-                        updateCounters();
-                    }, 300);
-                } else {
-                    showToast('Error: ' + data.message, 'error');
-                    // Re-enable button
-                    if (confirmBtn) {
-                        confirmBtn.disabled = false;
-                        confirmBtn.textContent = '✅ Confirm Payment Received';
+                websocket.onopen = () => {
+                    document.getElementById('wsIcon').textContent = '🟢';
+                    document.getElementById('wsText').textContent = 'Connected';
+                    document.getElementById('wsStatus').classList.add('connected');
+                    console.log('WebSocket connected');
+                };
+                
+                websocket.onmessage = (e) => {
+                    try {
+                        const data = JSON.parse(e.data);
+                        console.log('WebSocket message:', data.type);
+                        
+                        if (data.type === 'new_order') {
+                            handleNewOrder(data.order);
+                        } else if (data.type === 'status_changed') {
+                            handleStatusChanged(data.order, data.old_status, data.new_status);
+                        } else if (data.type === 'payment_confirmed') {
+                            handlePaymentConfirmed(data.order);
+                        } else if (data.type === 'pong') {
+                            // Keep-alive response
+                        }
+                    } catch (err) {
+                        console.error('Error parsing WebSocket message:', err);
                     }
-                }
+                };
+                
+                websocket.onerror = () => {
+                    document.getElementById('wsIcon').textContent = '🔴';
+                    document.getElementById('wsText').textContent = 'Error';
+                    console.error('WebSocket error');
+                };
+                
+                websocket.onclose = () => {
+                    document.getElementById('wsIcon').textContent = '🔄';
+                    document.getElementById('wsText').textContent = 'Reconnecting...';
+                    document.getElementById('wsStatus').classList.remove('connected');
+                    console.log('WebSocket closed, reconnecting...');
+                    setTimeout(connectWebSocket, 3000);
+                };
             } catch (error) {
-                showToast('Error confirming payment: ' + error.message, 'error');
-                // Re-enable button
-                if (confirmBtn) {
-                    confirmBtn.disabled = false;
-                    confirmBtn.textContent = '✅ Confirm Payment Received';
-                }
+                console.error('WebSocket connection error:', error);
             }
         }
         
-        // Make confirmPayment globally accessible
-        window.confirmPayment = confirmPayment;
-        window.submitPaymentConfirmation = submitPaymentConfirmation;
-        
-        // Initialize WebSocket connection
+        // Initialize
         connectWebSocket();
         
-        // Manual refresh on page focus
-        document.addEventListener('visibilitychange', function() {
-            if (!document.hidden) {
-                refreshOrders();
-            }
-        });
-        
-        // PHASE 3: Apply priority classes to existing order cards on page load
-        function applyPriorityClasses() {
-            document.querySelectorAll('.order-card').forEach(card => {
-                const created = card.getAttribute('data-created-at');
-                const total = parseFloat(card.getAttribute('data-total') || 0);
-                
-                if (created) {
-                    const createdDate = new Date(created);
-                    const now = new Date();
-                    const hoursOld = (now - createdDate) / (1000 * 60 * 60);
-                    
-                    // Remove existing priority classes
-                    card.classList.remove('urgent', 'high-value', 'old-order');
-                    
-                    // Add priority classes
-                    if (hoursOld > 4 || total > 100) {
-                        card.classList.add('urgent');
-                    }
-                    if (total > 50) {
-                        card.classList.add('high-value');
-                    }
-                    if (hoursOld > 2) {
-                        card.classList.add('old-order');
+        // Update time-ago every minute
+        setInterval(() => {
+            document.querySelectorAll('.time-ago').forEach(el => {
+                const card = el.closest('.order-card');
+                if (card) {
+                    const createdAt = card.getAttribute('data-created-at');
+                    if (createdAt) {
+                        el.textContent = getTimeAgo(createdAt);
                     }
                 }
             });
-        }
+        }, 60000); // Update every minute
         
-        // Apply priority classes on page load
-        applyPriorityClasses();
+        // Auto-refresh every 30 seconds as backup
+        setInterval(refreshOrders, 30000);
+        
+        // Refresh on page focus
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) refreshOrders();
+        });
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Don't trigger when typing in input
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            
+            // R = Refresh
+            if (e.key === 'r' || e.key === 'R') {
+                if (e.ctrlKey || e.metaKey) {
+                    e.preventDefault();
+                    refreshOrders();
+                    showToast('Refreshing...', 'info');
+                }
+            }
+            
+            // Escape = Clear search
+            if (e.key === 'Escape') {
+                const searchInput = document.getElementById('searchInput');
+                if (searchInput && searchInput.value) {
+                    searchInput.value = '';
+                    filterOrders();
+                }
+            }
+        });
     </script>
-    
-    <!-- PHASE 2: Keyboard Shortcuts Hint -->
-    <div class="keyboard-hint" id="keyboardHint">
-        <div style="font-weight: 600; margin-bottom: 8px;">⌨️ Keyboard Shortcuts:</div>
-        <div><kbd>S</kbd> Start Preparing</div>
-        <div><kbd>R</kbd> Mark Ready</div>
-        <div><kbd>D</kbd> Out for Delivery</div>
-        <div><kbd>C</kbd> Confirm Payment</div>
-        <div><kbd>Esc</kbd> Clear Selection</div>
-    </div>
 </body>
 </html>

@@ -49,13 +49,17 @@ db.sqlite3-journal
 .env
 .env.local
 .env.*.local
+.env.production
+.env.development
+*.env
 
 # Logs
 logs/*.log
 *.log
 
-# Backups
-backups/
+# Backups (keep structure, ignore content)
+backups/*
+!backups/.gitkeep
 *.backup
 *.bak
 

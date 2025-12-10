@@ -29,7 +29,14 @@ except ImportError:
 
 # SECURITY WARNING: keep the secret key used in production secret!
 # Use environment variable in production: export SECRET_KEY='your-secret-key'
-SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-wr-e*gp=1*s26id!o2h#tik($w^#olr20*8wn98aplo#wma%!u')
+# If SECRET_KEY is not set, raise an error in production
+SECRET_KEY = os.environ.get('SECRET_KEY')
+if not SECRET_KEY:
+    if DEBUG:
+        # Only allow default in development
+        SECRET_KEY = 'django-insecure-wr-e*gp=1*s26id!o2h#tik($w^#olr20*8wn98aplo#wma%!u'
+    else:
+        raise ValueError("SECRET_KEY environment variable must be set in production!")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # Set DEBUG=False in production: export DEBUG='False'
@@ -405,17 +412,16 @@ if not logs_dir.exists():
     os.makedirs(logs_dir, exist_ok=True)
 
 # Bakong API Configuration
-BAKONG_API_BASE = 'https://bakongapi.com'
-BAKONG_ID = 'vicheka_yeun@wing'  # ⚠️ This is a Wing account - may only accept Wing payments
-                                  # For multi-bank support, use a universal Bakong account (not @wing/@aba/@acleda)
-                                  # Or register as merchant with each bank you want to accept payments from
-BAKONG_MERCHANT_NAME = 'MADAM DA'  # Note: Must match exactly what's in your Bakong dashboard whitelist
+# Set BAKONG_ID and BAKONG_MERCHANT_NAME in environment variables or .env file
+BAKONG_API_BASE = os.environ.get('BAKONG_API_BASE', 'https://bakongapi.com')
+BAKONG_ID = os.environ.get('BAKONG_ID', '')  # Set in .env file - ⚠️ This should be a universal Bakong account for multi-bank support
+BAKONG_MERCHANT_NAME = os.environ.get('BAKONG_MERCHANT_NAME', 'MADAM DA')  # Must match exactly what's in your Bakong dashboard whitelist
 
 # Telegram Bot Configuration for Order Notifications
-# IMPORTANT: If you have TELEGRAM_BOT_TOKEN in environment variables, it will override this
-# Make sure your environment variable matches the correct token!
-TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '8319720413:AAEeTcPJ11TyB-_h7wQ7tYi_8dCj6PzWwkM')
-TELEGRAM_CHAT_ID = os.environ.get('TELEGRAM_CHAT_ID', '-4974214796')  # MADAM DA ORDER group chat ID
+# IMPORTANT: Set TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID in environment variables or .env file
+# Never commit actual tokens to version control!
+TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN', '')  # Set in .env file
+TELEGRAM_CHAT_ID = os.environ.get('TELEGRAM_CHAT_ID', '')  # Set in .env file
 TELEGRAM_ENABLED = bool(TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID)
 
 # Default primary key field type
