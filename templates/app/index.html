@@ -1,8 +1,9 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="MADAM DA - Premium Beauty & Cosmetics">
     <title>MADAM DA | Premium Beauty</title>
@@ -39,22 +40,23 @@
                     </button>
                     <div class="dropdown-menu" id="dropdown-menu" role="menu" aria-orientation="vertical">
                         <a role="menuitem" class="menu-item" href="{% url 'shop' %}" onclick="closeMenu(); return true;">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" viewBox="1.5 1.97 21 19.78">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="1.5 1.97 21 19.78" stroke-width="2" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"></path>
                             </svg>
-                            Home
+                            <span>Home</span>
                         </a>
                         <a role="menuitem" class="menu-item" href="#" onclick="openTrackOrder(); closeMenu(); return false;">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" viewBox="0 0 24 24">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"></path>
                             </svg>
-                            Track Order
+                            <span>Track Order</span>
                         </a>
+                        <div class="menu-divider"></div>
                         <a role="menuitem" class="menu-item" href="#" onclick="setLanguage('en'); return false;">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke-width="1.5" stroke="currentColor" class="w-4 h-4" viewBox="2.25 2.25 19.79 19.5">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="2.25 2.25 19.79 19.5" stroke-width="2" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 3v1.5M3 21v-6m0 0 2.77-.693a9 9 0 0 1 6.208.682l.108.054a9 9 0 0 0 6.086.71l3.114-.732a48.524 48.524 0 0 1-.005-10.499l-3.11.732a9 9 0 0 1-6.085-.711l-.108-.054a9 9 0 0 0-6.208-.682L3 4.5M3 15V4.5"></path>
                             </svg>
-                            EN
+                            <span>English (EN)</span>
                         </a>
                     </div>
                 </div>
@@ -124,7 +126,7 @@
             <div class="product-grid" id="product-grid">
                 {% for product in products %}
                 <div class="product-card" data-id="{{ product.id }}">
-                    {% if product.badge %}<div class="product-badge">{{ product.badge }}</div>{% endif %}
+                    {% if product.badge %}<div class="product-badge">{{ product.badge }}</div>{% elif product.badge_kh %}<div class="product-badge">{{ product.badge_kh }}</div>{% endif %}
                     <div class="product-image-wrap">
                         {% if product.image_urls %}
                         <picture>
@@ -149,6 +151,7 @@
                     </div>
                     <div class="product-info">
                         <h3 class="product-name">{{ product.name }}</h3>
+                        {% if product.name_kh and product.name != product.name_kh %}<p class="product-name-kh" style="font-size: 0.85em; color: #666; margin-top: 4px;">{{ product.name_kh }}</p>{% endif %}
                         <div class="product-price">
                             <span class="price-current">${{ product.price|floatformat:2 }}</span>
                             {% if product.old_price %}<span class="price-old">${{ product.old_price|floatformat:2 }}</span>{% endif %}
@@ -242,10 +245,13 @@
             {
                 id: '{{ product.id }}',
                 name: '{{ product.name|escapejs }}',
+                nameEn: '{{ product.name|escapejs }}',
+                nameKh: {% if product.name_kh %}'{{ product.name_kh|escapejs }}'{% else %}null{% endif %},
                 price: {{ product.price }},
                 oldPrice: {% if product.old_price %}{{ product.old_price }}{% else %}null{% endif %},
                 image: '{% if product.image_urls %}{{ product.image_urls.webp|default:product.image_urls.png|default:product.image }}{% else %}{{ product.image }}{% endif %}',
-                badge: {% if product.badge %}'{{ product.badge }}'{% else %}null{% endif %}
+                badge: {% if product.badge %}'{{ product.badge|escapejs }}'{% else %}null{% endif %},
+                badgeKh: {% if product.badge_kh %}'{{ product.badge_kh|escapejs }}'{% else %}null{% endif %}
             }{% if not forloop.last %},{% endif %}
             {% endfor %}
         ];

@@ -21,6 +21,7 @@
             --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
             --font-main: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             --font-display: 'Playfair Display', Georgia, serif;
+            --font-khmer: 'Dangrek', 'AkbalthomMonstera', 'Khmer', 'Noto Sans Khmer', sans-serif;
             --radius: 8px;
             --radius-md: 12px;
             --radius-lg: 20px;
@@ -37,7 +38,7 @@
         }
 
         body {
-            font-family: var(--font-main);
+            font-family: var(--font-main), var(--font-khmer);
             background: var(--bg);
             color: var(--text);
             line-height: 1.7;
@@ -45,6 +46,16 @@
             -moz-osx-font-smoothing: grayscale;
             overflow-x: hidden;
             letter-spacing: -0.01em;
+        }
+        
+        /* Ensure Khmer text renders properly */
+        * {
+            font-family: inherit;
+        }
+        
+        /* Force Khmer font support for all text elements */
+        p, span, div, h1, h2, h3, h4, h5, h6, a, button, input, textarea, select, label {
+            font-family: var(--font-main), var(--font-khmer), sans-serif;
         }
         
         img {
@@ -488,6 +499,49 @@
             transform: translateY(-2px);
         }
 
+        .btn-download {
+            flex: 1;
+            min-width: 200px;
+            padding: 16px 32px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: var(--transition);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            font-family: var(--font-main);
+        }
+
+        .btn-download:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+        }
+
+        .btn-download:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .btn-download:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-download svg {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+
 
 
         /* ========== RESPONSIVE ========== */
@@ -513,7 +567,8 @@
             }
 
             .btn-primary,
-            .btn-secondary {
+            .btn-secondary,
+            .btn-download {
                 width: 100%;
                 min-width: unset;
             }

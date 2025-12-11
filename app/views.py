@@ -149,22 +149,60 @@ def order_success_view(request):
     qr_code_obj = None
     try:
         # Check if order already exists (might have been created when payment was confirmed)
-        order_number_formatted = order_number if order_number.startswith('MD') else f"MD{order_number.zfill(5)}"
-        try:
-            order = Order.objects.get(order_number=order_number_formatted)
-            logger.info(f"Order {order_number_formatted} already exists, skipping creation in order_success_view")
-        except Order.DoesNotExist:
+        # Validate order number format - if it contains non-digit characters after MD, it's invalid
+        if order_number and order_number.startswith('MD'):
+            # Extract numeric part
+            numeric_part = order_number.replace('MD', '').replace('#', '').strip()
+            # If numeric part is not all digits, try to find the order by the provided number first
+            if not numeric_part.isdigit():
+                # Invalid format like "MD00NEW" - try to find order by exact match first
+                try:
+                    order = Order.objects.get(order_number=order_number)
+                    logger.info(f"Order {order_number} found by exact match")
+                except Order.DoesNotExist:
+                    # If not found, this is an invalid order number
+                    logger.warning(f"Invalid order number format: {order_number}. Order may not exist.")
+                    order = None
+            else:
+                # Valid format - format it properly
+                order_number_formatted = f"MD{numeric_part.zfill(5)}"
+                try:
+                    order = Order.objects.get(order_number=order_number_formatted)
+                    logger.info(f"Order {order_number_formatted} already exists, skipping creation in order_success_view")
+                except Order.DoesNotExist:
+                    # Try exact match as fallback
+                    try:
+                        order = Order.objects.get(order_number=order_number)
+                        logger.info(f"Order {order_number} found by exact match (fallback)")
+                    except Order.DoesNotExist:
+                        order = None
+        else:
+            # Format order number if it doesn't start with MD
+            order_number_formatted = f"MD{order_number.zfill(5)}" if order_number and order_number.isdigit() else order_number
+            try:
+                order = Order.objects.get(order_number=order_number_formatted)
+                logger.info(f"Order {order_number_formatted} already exists")
+            except Order.DoesNotExist:
+                # Try exact match
+                try:
+                    order = Order.objects.get(order_number=order_number)
+                    logger.info(f"Order {order_number} found by exact match")
+                except Order.DoesNotExist:
+                    order = None
+        
+        # If order not found and we have valid data, create it
+        if not order and name and phone and address:
             # This path should ideally not be taken if create_order_on_payment is called
-            logger.warning(f"Order {order_number_formatted} not found, creating in order_success_view. This might indicate a missed payment confirmation.")
+            logger.warning(f"Order not found, creating in order_success_view. This might indicate a missed payment confirmation.")
             # Get or create customer
             customer, _ = Customer.objects.get_or_create(
                 phone=phone,
                 defaults={'name': name, 'address': address, 'province': province}
             )
             
-            # Create order
-            order = Order.objects.create(
-                order_number=order_number_formatted,
+            # Don't set order_number - let the model generate it sequentially
+            # Create order without order_number to trigger auto-generation
+            order = Order(
                 customer=customer,
                 customer_name=name,
                 customer_phone=phone,
@@ -176,9 +214,11 @@ def order_success_view(request):
                 total=Decimal(str(total)),
                 payment_method=payment_method,
                 status='pending',
-                customer_received=False,  # Explicitly set to False for new orders
-                payment_received=False  # Explicitly set to False for new orders
+                customer_received=False,
+                payment_received=False
             )
+            # Save to trigger order_number generation
+            order.save()
             
             # Create order items
             for item in items:
@@ -257,9 +297,19 @@ def order_success_view(request):
     except Exception as e:
         logger.error(f"Error saving order in order_success_view: {str(e)}")
     
+    # Get the actual order number - prefer from order object, fallback to formatted query param
+    # If order_number contains "NEW" or is invalid, use the order's actual number
+    if order:
+        display_order_number = order.order_number
+    elif order_number and ('NEW' in str(order_number).upper() or not order_number.startswith('MD') or len(order_number.replace('MD', '').replace('#', '').strip()) < 3):
+        # Invalid order number format - try to find by other means or use placeholder
+        display_order_number = order_number  # Will show as-is, but should be fixed by proper order creation
+    else:
+        display_order_number = order_number if order_number else 'N/A'
+    
     context = {
         'order': order,
-        'order_number': order.order_number if order else order_number,
+        'order_number': display_order_number,
         'name': name,
         'phone': phone,
         'address': address,
@@ -1437,9 +1487,9 @@ def track_order_api(request):
             # Get order items
             items = OrderItem.objects.filter(order=order).select_related('product')
             items_data = [{
-                'product_name': item.product.name,
+                'product_name': item.product.name if item.product else item.product_name,
                 'quantity': item.quantity,
-                'price': str(item.price),
+                'price': str(item.product_price),
                 'subtotal': str(item.subtotal)
             } for item in items]
             

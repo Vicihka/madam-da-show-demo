@@ -19,8 +19,17 @@ class CompressionMiddleware(MiddlewareMixin):
     """
     
     def process_response(self, request, response):
-        # Only compress text-based content
+        # Ensure UTF-8 charset is set for text responses
         content_type = response.get('Content-Type', '')
+        if content_type:
+            # Check if charset is missing
+            if 'charset' not in content_type.lower():
+                # Add charset=utf-8 to text-based content types
+                if any(ct in content_type for ct in ['text/html', 'text/css', 'application/javascript', 'application/json', 'text/javascript', 'text/plain']):
+                    response['Content-Type'] = f"{content_type}; charset=utf-8"
+                    content_type = response.get('Content-Type', '')
+        
+        # Only compress text-based content
         if not any(ct in content_type for ct in ['text/html', 'text/css', 'application/javascript', 'application/json', 'text/javascript']):
             return response
         

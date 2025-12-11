@@ -706,6 +706,7 @@
                 const result = await response.json();
                 if (result.success) {
                     console.log('COD Order created:', result.order_number);
+                    window.lastOrderNumber = result.order_number;
                     window.currentOrderNumber = result.order_number;
                 } else {
                     throw new Error(result.message || 'Failed to create order');
@@ -974,9 +975,23 @@
             setupSelectDropdown();
         }
         
-        function confirmOrder(paymentMethod) {
-            // Redirect to success page immediately for non-KHQR payments
-            redirectToSuccessPage();
+        async function confirmOrder(paymentMethod) {
+            // For COD, create order first, then redirect
+            if (paymentMethod === 'cod') {
+                try {
+                    await createOrderForCOD();
+                    // Small delay to ensure order is saved
+                    setTimeout(() => {
+                        redirectToSuccessPage();
+                    }, 100);
+                } catch (error) {
+                    console.error('Error creating COD order:', error);
+                    alert('Failed to create order. Please try again.');
+                }
+            } else {
+                // For other payment methods, redirect immediately
+                redirectToSuccessPage();
+            }
         }
         
         // ========== HEADER MENU FUNCTIONS (Optimized) ==========

@@ -101,9 +101,13 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
+            'builtins': ['django.templatetags.static'],
         },
     },
 ]
+
+# Ensure all responses use UTF-8
+FILE_CHARSET = 'utf-8'
 
 WSGI_APPLICATION = 'project.wsgi.application'
 
@@ -175,6 +179,9 @@ except ImportError:
             'default': {
                 'ENGINE': 'django.db.backends.sqlite3',
                 'NAME': BASE_DIR / 'db.sqlite3',
+                'OPTIONS': {
+                    'timeout': 20,
+                },
             }
         }
 
