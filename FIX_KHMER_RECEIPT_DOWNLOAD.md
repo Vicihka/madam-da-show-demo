@@ -214,3 +214,10 @@ font-family: 'Inter', 'Dangrek', 'AkbalthomMonstera', 'Khmer', 'Noto Sans Khmer'
 The receipt download feature now properly handles Khmer text on all devices!
 
 
+
+
+
+
+
+
+

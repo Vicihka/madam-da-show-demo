@@ -20,16 +20,20 @@ logger = logging.getLogger(__name__)
 def employee_dashboard(request):
     """Main employee dashboard - shows orders that need action"""
     
+    # Maximum orders to load per status (prevents memory issues with 1000+ orders)
+    MAX_ORDERS_PER_STATUS = 100
+    
     # Get orders that need preparation (confirmed or pending)
     # Exclude orders that are already received by customer
     # Optimized with select_related and prefetch_related for better performance
+    # LIMITED to prevent loading too many orders at once
     orders_to_prepare = Order.objects.filter(
         status__in=['pending', 'confirmed']
     ).exclude(status='cancelled').exclude(customer_received=True).select_related(
         'customer', 'promo_code'
     ).prefetch_related(
         Prefetch('items', queryset=OrderItem.objects.select_related('product'))
-    ).order_by('-created_at')
+    ).order_by('-created_at')[:MAX_ORDERS_PER_STATUS]
     
     # Get orders being prepared
     # Exclude orders that are already received by customer
@@ -39,7 +43,7 @@ def employee_dashboard(request):
         'customer', 'promo_code'
     ).prefetch_related(
         Prefetch('items', queryset=OrderItem.objects.select_related('product'))
-    ).order_by('-created_at')
+    ).order_by('-created_at')[:MAX_ORDERS_PER_STATUS]
     
     # Get orders ready for delivery
     # Exclude orders that are already received by customer
@@ -47,7 +51,7 @@ def employee_dashboard(request):
         status='ready_for_delivery'
     ).exclude(customer_received=True).select_related(
         'customer', 'promo_code'
-    ).prefetch_related('items').order_by('-created_at')
+    ).prefetch_related('items').order_by('-created_at')[:MAX_ORDERS_PER_STATUS]
     
     # Get orders out for delivery
     # Exclude orders that are already received by customer
@@ -55,7 +59,7 @@ def employee_dashboard(request):
         status='out_for_delivery'
     ).exclude(customer_received=True).select_related(
         'customer', 'promo_code'
-    ).prefetch_related('items').order_by('-created_at')
+    ).prefetch_related('items').order_by('-created_at')[:MAX_ORDERS_PER_STATUS]
     
     # Get delivered orders (show ALL delivered orders from last 7 days, not just today)
     # This ensures delivered orders persist even after page refresh

@@ -9,6 +9,8 @@ from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from django.utils.html import escape
 from django.conf import settings
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.core.cache import cache
 import requests
 import json
 import logging
@@ -67,25 +69,25 @@ def send_telegram_notification(order):
 """
             
             url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
-            requests.post(url, json={
+            response = requests.post(url, json={
                 'chat_id': chat_id,
                 'text': message,
                 'parse_mode': 'HTML'
             }, timeout=10)
-            return True
-        except:
-            return False
-        
-        if response.status_code == 200:
-            result = response.json()
-            if result.get('ok'):
-                logger.info(f"✅ Telegram notification sent successfully for order {order.order_number}")
-                return True
+            
+            if response.status_code == 200:
+                result = response.json()
+                if result.get('ok'):
+                    logger.info(f"✅ Telegram notification sent successfully for order {order.order_number}")
+                    return True
+                else:
+                    logger.error(f"❌ Telegram API returned error: {result.get('description', 'Unknown error')}")
+                    return False
             else:
-                logger.error(f"❌ Telegram API returned error: {result.get('description', 'Unknown error')}")
+                logger.error(f"❌ Failed to send Telegram notification. Status: {response.status_code}, Response: {response.text}")
                 return False
-        else:
-            logger.error(f"❌ Failed to send Telegram notification. Status: {response.status_code}, Response: {response.text}")
+        except Exception as fallback_error:
+            logger.error(f"❌ Fallback Telegram notification failed: {str(fallback_error)}", exc_info=True)
             return False
             
     except Exception as e:
@@ -93,11 +95,97 @@ def send_telegram_notification(order):
         return False
 
 
+@require_http_methods(["GET"])
+def health_check(request):
+    """Health check endpoint for monitoring and load balancers"""
+    from django.db import connection
+    from django.core.cache import cache
+    from django.conf import settings
+    
+    try:
+        # Check database connection
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT 1")
+            db_status = "ok"
+    except Exception as e:
+        db_status = f"error: {str(e)}"
+    
+    # Check cache (Redis or DummyCache)
+    cache_status = "ok"
+    cache_type = "unknown"
+    try:
+        # Get cache backend type
+        cache_backend = settings.CACHES['default']['BACKEND']
+        if 'dummy' in cache_backend.lower():
+            cache_type = "dummy (development)"
+            # DummyCache always works, just mark as ok
+            cache_status = "ok"
+        elif 'redis' in cache_backend.lower():
+            cache_type = "redis"
+            # Test Redis connection
+            cache.set('health_check_test', 'ok', 1)
+            test_value = cache.get('health_check_test')
+            if test_value == 'ok':
+                cache_status = "ok"
+            else:
+                cache_status = "error: cache get failed"
+        else:
+            cache_type = cache_backend
+            # Try basic cache operation
+            cache.set('health_check_test', 'ok', 1)
+            test_value = cache.get('health_check_test')
+            if test_value == 'ok':
+                cache_status = "ok"
+            else:
+                cache_status = "error: cache get failed"
+    except Exception as e:
+        cache_status = f"error: {str(e)}"
+        cache_type = "error"
+    
+    # Overall status - database is critical, cache is optional
+    # If database is ok, status is ok (even if cache fails)
+    overall_status = "ok" if db_status == "ok" else "error"
+    if db_status == "ok" and cache_status != "ok":
+        overall_status = "degraded"  # Database ok but cache not working
+    
+    status_code = 200 if overall_status == "ok" else (503 if overall_status == "error" else 200)
+    
+    return JsonResponse({
+        'status': overall_status,
+        'database': db_status,
+        'cache': cache_status,
+        'cache_type': cache_type,
+        'debug_mode': settings.DEBUG,
+        'timestamp': timezone.now().isoformat(),
+    }, status=status_code)
+
+
 @ensure_csrf_cookie
 def shop_view(request):
-    """Shop/homepage view"""
-    products = Product.objects.filter(is_active=True).order_by('id')
-    hero_slides = HeroSlide.objects.filter(is_active=True).order_by('order')
+    """Shop/homepage view - Optimized with pagination and caching for 1000+ customers"""
+    # Get products with pagination - 20 products per page for better performance
+    products_queryset = Product.objects.filter(is_active=True).order_by('id')
+    
+    # Add pagination
+    paginator = Paginator(products_queryset, 20)
+    page = request.GET.get('page', 1)
+    
+    try:
+        products = paginator.page(page)
+    except PageNotAnInteger:
+        products = paginator.page(1)
+    except EmptyPage:
+        products = paginator.page(paginator.num_pages)
+    
+    # Cache hero slides for 10 minutes (change less frequently)
+    # Note: Products are not cached because pagination requires fresh queries
+    # The database query is already optimized with indexes
+    cache_key_slides = 'active_hero_slides'
+    hero_slides = cache.get(cache_key_slides)
+    
+    if not hero_slides:
+        hero_slides = list(HeroSlide.objects.filter(is_active=True).order_by('order'))
+        cache.set(cache_key_slides, hero_slides, 600)  # 10 minutes
     
     context = {
         'products': products,
@@ -430,17 +518,17 @@ def validate_promo_code(request):
                 }, status=400)
             
             # Check minimum amount
-            if promo.minimum_amount and amount < promo.minimum_amount:
+            if promo.min_purchase and amount < promo.min_purchase:
                 return JsonResponse({
                     'success': False,
-                    'message': f'Minimum order amount is ${promo.minimum_amount}'
+                    'message': f'Minimum order amount is ${promo.min_purchase}'
                 }, status=400)
             
             # Calculate discount
             if promo.discount_type == 'percentage':
                 discount = (amount * promo.discount_value) / 100
-                if promo.maximum_discount:
-                    discount = min(discount, promo.maximum_discount)
+                if promo.max_discount:
+                    discount = min(discount, promo.max_discount)
             else:
                 discount = promo.discount_value
             
@@ -1396,24 +1484,44 @@ def customer_lookup(request):
                 'message': 'Invalid phone number format'
             }, status=400)
         
-        # Try to find customer by phone (exact match or normalized)
-        try:
-            # First try exact match
-            customer = Customer.objects.get(phone=phone)
-        except Customer.DoesNotExist:
-            # Try normalized phone
-            try:
-                customer = Customer.objects.filter(phone__icontains=normalized_phone).first()
-            except:
-                customer = None
+        # Try to find customer by phone - OPTIMIZED: Use exact match with index (no icontains)
+        customer = None
         
-        # If still not found, try to find from recent orders
+        # Try exact match first (uses index, very fast)
+        try:
+            customer = Customer.objects.get(phone=normalized_phone)
+        except Customer.DoesNotExist:
+            # Try common phone number variations (still using exact match, fast)
+            phone_variations = [
+                normalized_phone,
+                f"0{normalized_phone}",
+                f"+855{normalized_phone}",
+                normalized_phone[-9:],  # Last 9 digits
+            ]
+            
+            for phone_variant in phone_variations:
+                try:
+                    customer = Customer.objects.get(phone=phone_variant)
+                    break
+                except Customer.DoesNotExist:
+                    continue
+        
+        # If still not found, try to find from recent orders (use exact match with index)
         if not customer:
             try:
-                # Get the most recent order with this phone number
+                # Try exact match first (uses index on customer_phone)
                 order = Order.objects.filter(
-                    customer_phone__icontains=normalized_phone
+                    customer_phone=normalized_phone
                 ).order_by('-created_at').first()
+                
+                # If not found, try variations
+                if not order:
+                    for phone_variant in [f"0{normalized_phone}", normalized_phone[-9:]]:
+                        order = Order.objects.filter(
+                            customer_phone=phone_variant
+                        ).order_by('-created_at').first()
+                        if order:
+                            break
                 
                 if order:
                     # Return customer data from order

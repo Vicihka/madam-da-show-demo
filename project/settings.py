@@ -27,6 +27,10 @@ except ImportError:
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
+# SECURITY WARNING: don't run with debug turned on in production!
+# Set DEBUG=False in production: export DEBUG='False'
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'
+
 # SECURITY WARNING: keep the secret key used in production secret!
 # Use environment variable in production: export SECRET_KEY='your-secret-key'
 # If SECRET_KEY is not set, raise an error in production
@@ -38,13 +42,20 @@ if not SECRET_KEY:
     else:
         raise ValueError("SECRET_KEY environment variable must be set in production!")
 
-# SECURITY WARNING: don't run with debug turned on in production!
-# Set DEBUG=False in production: export DEBUG='False'
-DEBUG = os.environ.get('DEBUG', 'True') == 'True'
-
 # ALLOWED_HOSTS: Set in production: export ALLOWED_HOSTS='yourdomain.com,www.yourdomain.com'
 # For local testing on mobile devices, allow all hosts in development
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').split(',') if os.environ.get('ALLOWED_HOSTS') else ['*'] if DEBUG else []
+# IMPORTANT: When DEBUG=False, you MUST set ALLOWED_HOSTS in environment variables!
+allowed_hosts_env = os.environ.get('ALLOWED_HOSTS', '').strip()
+if allowed_hosts_env:
+    # Use environment variable if set
+    ALLOWED_HOSTS = [host.strip() for host in allowed_hosts_env.split(',') if host.strip()]
+elif DEBUG:
+    # Development: Allow all hosts for local testing
+    ALLOWED_HOSTS = ['*', '127.0.0.1', 'localhost']
+else:
+    # Production: Default to localhost if not set (for testing)
+    # WARNING: Set ALLOWED_HOSTS in production!
+    ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
 
 # Application definition
@@ -66,7 +77,12 @@ INSTALLED_APPS = [
 # In development, rate limiting decorators are handled gracefully in views.py
 # and won't enforce limits
 if not DEBUG:
-    INSTALLED_APPS.append('django_ratelimit')
+    try:
+        import django_ratelimit
+        INSTALLED_APPS.append('django_ratelimit')
+    except ImportError:
+        # django_ratelimit not installed - rate limiting will be handled in views.py
+        pass
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -145,6 +161,11 @@ try:
                     'PASSWORD': db_password,
                     'HOST': os.environ.get('DB_HOST', 'localhost'),
                     'PORT': os.environ.get('DB_PORT', '5432'),
+                    'OPTIONS': {
+                        'connect_timeout': 10,  # Connection timeout in seconds
+                    },
+                    'CONN_MAX_AGE': 600,  # Keep connections for 10 minutes (connection pooling)
+                    'ATOMIC_REQUESTS': False,  # Don't wrap each request in transaction (better performance)
                 }
             }
         else:
@@ -171,6 +192,11 @@ except ImportError:
                 'PASSWORD': db_password,
                 'HOST': os.environ.get('DB_HOST', 'localhost'),
                 'PORT': os.environ.get('DB_PORT', '5432'),
+                'OPTIONS': {
+                    'connect_timeout': 10,  # Connection timeout in seconds
+                },
+                'CONN_MAX_AGE': 600,  # Keep connections for 10 minutes (connection pooling)
+                'ATOMIC_REQUESTS': False,  # Don't wrap each request in transaction (better performance)
             }
         }
     else:
@@ -317,13 +343,20 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = 'DENY'
 
 # Additional Security Settings
+# Only enable HTTPS redirect in production if behind a proxy/load balancer
+# For local testing with DEBUG=False, disable SSL redirect
 if not DEBUG:
-    SECURE_SSL_REDIRECT = True
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
-    SECURE_HSTS_SECONDS = 31536000  # 1 year
-    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-    SECURE_HSTS_PRELOAD = True
+    # Check if we're behind a proxy (production) or local testing
+    # Only enable SSL redirect if explicitly set or if we detect we're in production
+    enable_ssl_redirect = os.environ.get('ENABLE_SSL_REDIRECT', 'False').lower() == 'true'
+    if enable_ssl_redirect:
+        SECURE_SSL_REDIRECT = True
+        SECURE_HSTS_SECONDS = 31536000  # 1 year
+        SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+        SECURE_HSTS_PRELOAD = True
+    else:
+        # Local testing with DEBUG=False - don't require HTTPS
+        SECURE_SSL_REDIRECT = False
 
 # Rate Limiting (using Django's built-in)
 RATELIMIT_ENABLE = True

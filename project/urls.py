@@ -33,6 +33,9 @@ if not admin_url.endswith('/'):
 urlpatterns = [
     path(admin_url, admin.site.urls),  # Admin panel
     path('i18n/', include('django.conf.urls.i18n')),
+    # Health check endpoint (for monitoring and load balancers)
+    path('health/', views.health_check, name='health_check'),
+    path('api/health/', views.health_check, name='api_health_check'),
     # Silence Chrome DevTools well-known file requests
     path('.well-known/appspecific/com.chrome.devtools.json', lambda r: HttpResponse('{}', content_type='application/json')),
     # Favicon - browsers automatically request /favicon.ico

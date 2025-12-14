@@ -267,3 +267,10 @@ downloadReceipt();
 **The download receipt feature is fully functional and ready to use!** 🎊
 
 
+
+
+
+
+
+
+
