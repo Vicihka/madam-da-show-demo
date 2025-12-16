@@ -907,30 +907,15 @@ def create_order_on_payment(request):
         discount_amount = Decimal(str(data.get('discount', 0)))
         items = data.get('items', [])
         
-        # Validate required fields - check each field individually for better error messages
-        missing_fields = []
-        if not name:
-            missing_fields.append('name')
-        if not phone:
-            missing_fields.append('phone')
-        if not address:
-            missing_fields.append('address')
-        if not province:
-            missing_fields.append('province')
-        
-        if missing_fields:
-            error = ValidationError(f'Missing required fields: {", ".join(missing_fields)}')
-            context = {
-                'endpoint': 'create_order_on_payment',
-                'missing_fields': missing_fields,
-                'received_data': {
-                    'name': bool(name),
-                    'phone': bool(phone),
-                    'address': bool(address),
-                    'province': bool(province)
+        # Validate required fields
+        if not all([name, phone, address, province]):
+            return JsonResponse({
+                'success': False,
+                'error': {
+                    'type': 'ValidationError',
+                    'message': 'Missing required fields: name, phone, address, and province are required'
                 }
-            }
-            return handle_api_error(error, context=context)
+            }, status=400)
         
         if not items:
             return JsonResponse({
@@ -978,21 +963,14 @@ def create_order_on_payment(request):
         
         # Get or create customer
         try:
-            customer, created = Customer.objects.get_or_create(
+            customer, _ = Customer.objects.get_or_create(
                 phone=phone,
                 defaults={'name': name, 'address': address, 'province': province}
             )
-            # Update customer info if customer already exists but info changed
-            if not created:
-                if customer.name != name or customer.address != address or customer.province != province:
-                    customer.name = name
-                    customer.address = address
-                    customer.province = province
-                    customer.save(update_fields=['name', 'address', 'province'])
         except IntegrityError as e:
             logger.error(f"Database error creating/updating customer: {e}", exc_info=True)
-            context = {'endpoint': 'create_order_on_payment', 'phone': phone, 'name': name}
-            return handle_api_error(DatabaseError('Failed to create or update customer'), context=context)
+            context = {'endpoint': 'create_order_on_payment', 'phone': phone}
+            return handle_api_error(DatabaseError('Failed to create customer'), context=context)
         
         # Determine order status based on payment method
         if payment_method == 'Cash on Delivery':
@@ -1087,8 +1065,8 @@ def create_order_on_payment(request):
                 product = None
                 if product_id:
                     try:
-                        # Use select_for_update to lock the row
-                        product = Product.objects.select_for_update().get(id=product_id)
+                        # Use select_for_update to lock the row - must check is_active=True for consistency
+                        product = Product.objects.select_for_update().get(id=product_id, is_active=True)
                         # Decrement stock
                         if product.stock >= quantity:
                             product.stock -= quantity
@@ -1097,7 +1075,9 @@ def create_order_on_payment(request):
                             # Stock changed between validation and order creation
                             raise InsufficientStockError(f'{product.name} is now out of stock')
                     except Product.DoesNotExist:
-                        pass
+                        # Product doesn't exist or is inactive - this should not happen if validation passed
+                        # but handle gracefully to prevent order creation with inactive products
+                        raise InsufficientStockError(f'Product {product_id} is no longer available (inactive or removed)')
                 
                 OrderItem.objects.create(
                     order=order,
