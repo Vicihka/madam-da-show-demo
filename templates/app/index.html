@@ -125,8 +125,14 @@
 
             <div class="product-grid" id="product-grid">
                 {% for product in products %}
-                <div class="product-card" data-id="{{ product.id }}">
-                    {% if product.badge %}<div class="product-badge">{{ product.badge }}</div>{% elif product.badge_kh %}<div class="product-badge">{{ product.badge_kh }}</div>{% endif %}
+                <div class="product-card" data-id="{{ product.id }}" data-stock="{{ product.stock }}">
+                    {% if product.stock <= 0 %}
+                        <div class="product-badge product-badge-out-of-stock">Out of Stock</div>
+                    {% elif product.badge %}
+                        <div class="product-badge">{{ product.badge }}</div>
+                    {% elif product.badge_kh %}
+                        <div class="product-badge">{{ product.badge_kh }}</div>
+                    {% endif %}
                     <div class="product-image-wrap">
                         {% if product.image_urls %}
                         <picture>
@@ -156,12 +162,21 @@
                             <span class="price-current">${{ product.price|floatformat:2 }}</span>
                             {% if product.old_price %}<span class="price-old">${{ product.old_price|floatformat:2 }}</span>{% endif %}
                         </div>
-                        <button class="btn-add-cart" onclick="addToCart('{{ product.id }}')" aria-label="Add {{ product.name }} to cart" title="Add to cart">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="2.37 1.5 19.25 21" stroke-width="1.5" stroke="currentColor" class="cart-icon-small" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"></path>
-                            </svg>
-                            Add to Cart
-                        </button>
+                        {% if product.stock <= 0 %}
+                            <button class="btn-add-cart btn-out-of-stock" disabled aria-label="{{ product.name }} is out of stock" title="Out of stock">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="2.37 1.5 19.25 21" stroke-width="1.5" stroke="currentColor" class="cart-icon-small" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"></path>
+                                </svg>
+                                Out of Stock
+                            </button>
+                        {% else %}
+                            <button class="btn-add-cart" onclick="addToCart('{{ product.id }}')" aria-label="Add {{ product.name }} to cart" title="Add to cart">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="2.37 1.5 19.25 21" stroke-width="1.5" stroke="currentColor" class="cart-icon-small" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"></path>
+                                </svg>
+                                Add to Cart
+                            </button>
+                        {% endif %}
                         <div class="qty-control">
                             <button class="qty-btn" onclick="updateCartQty('{{ product.id }}', -1)">−</button>
                             <div class="qty-value">1</div>
@@ -250,6 +265,7 @@
                 price: {{ product.price }},
                 oldPrice: {% if product.old_price %}{{ product.old_price }}{% else %}null{% endif %},
                 image: '{% if product.image_urls %}{{ product.image_urls.webp|default:product.image_urls.png|default:product.image }}{% else %}{{ product.image }}{% endif %}',
+                stock: {{ product.stock }},
                 badge: {% if product.badge %}'{{ product.badge|escapejs }}'{% else %}null{% endif %},
                 badgeKh: {% if product.badge_kh %}'{{ product.badge_kh|escapejs }}'{% else %}null{% endif %}
             }{% if not forloop.last %},{% endif %}

@@ -11,10 +11,15 @@ from django.urls import reverse
 
 
 def send_telegram_message(chat_id, text, reply_markup=None, parse_mode='HTML'):
-    """Send message to Telegram"""
+    """Send message to Telegram with proper error handling"""
+    import logging
+    
+    logger = logging.getLogger(__name__)
+    
     try:
         bot_token = settings.TELEGRAM_BOT_TOKEN
         if not bot_token:
+            logger.warning("Telegram bot token not configured")
             return False
         
         url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
@@ -29,9 +34,27 @@ def send_telegram_message(chat_id, text, reply_markup=None, parse_mode='HTML'):
             data['reply_markup'] = json.dumps(reply_markup)
         
         response = requests.post(url, json=data, timeout=10)
-        return response.status_code == 200
+        response.raise_for_status()  # Raise exception for bad status codes
+        
+        result = response.json()
+        if result.get('ok'):
+            return True
+        else:
+            error_desc = result.get('description', 'Unknown error')
+            logger.error(f"Telegram API error: {error_desc}")
+            return False
+            
+    except requests.exceptions.Timeout:
+        logger.error("Telegram API timeout")
+        return False
+    except requests.exceptions.ConnectionError:
+        logger.error("Telegram API connection error")
+        return False
+    except requests.exceptions.HTTPError as e:
+        logger.error(f"Telegram API HTTP error {e.response.status_code}: {e}")
+        return False
     except Exception as e:
-        print(f"Error sending Telegram message: {e}")
+        logger.error(f"Error sending Telegram message: {e}", exc_info=True)
         return False
 
 

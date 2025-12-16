@@ -68,6 +68,48 @@ function init() {
         }
     }
     
+    // Remove out-of-stock items from cart on page load
+    if (typeof PRODUCTS !== 'undefined' && Array.isArray(PRODUCTS)) {
+        const removedItems = [];
+        cart = cart.filter(item => {
+            const product = PRODUCTS.find(p => p.id === item.id);
+            if (!product) {
+                // Product no longer exists
+                removedItems.push(item.name);
+                return false;
+            }
+            if (product.stock !== undefined && product.stock <= 0) {
+                // Product is out of stock
+                removedItems.push(item.name);
+                return false;
+            }
+            // Update stock in cart item to match current product stock
+            item.stock = product.stock;
+            // Also ensure quantity doesn't exceed stock
+            if (item.qty > product.stock) {
+                item.qty = product.stock;
+            }
+            return true;
+        });
+        
+        if (removedItems.length > 0) {
+            // Save cleaned cart
+            try {
+                localStorage.setItem('madamda_cart', JSON.stringify(cart));
+            } catch (e) {
+                console.error('Error saving cleaned cart:', e);
+            }
+            
+            // Show notification about removed items
+            const message = `⚠️ ${removedItems.length} item(s) removed from cart (out of stock): ${removedItems.join(', ')}`;
+            if (typeof showToast === 'function') {
+                showToast(message, 'warning');
+            } else {
+                alert(message);
+            }
+        }
+    }
+    
     // Initialize debounced save function after cart is loaded
     debouncedSaveCart = debounce(() => {
         try {
@@ -185,9 +227,28 @@ function addToCart(productId) {
         return;
     }
 
+    // Check if product is out of stock
+    if (product.stock !== undefined && product.stock <= 0) {
+        alert('⚠️ This product is out of stock. Please try another product.');
+        return;
+    }
+
     const existingItem = cart.find(item => item.id === productId);
     
     if (existingItem) {
+        // Check if adding one more would exceed stock
+        if (product.stock !== undefined && existingItem.qty >= product.stock) {
+            // Show user-friendly message
+            if (typeof showToast === 'function') {
+                showToast(`⚠️ Only ${product.stock} item(s) available in stock. Cannot add more.`, 'warning');
+            } else {
+                alert(`⚠️ Only ${product.stock} item(s) available in stock. Cannot add more.`);
+            }
+            return;
+        }
+        
+        // Update stock in cart item to match current product stock
+        existingItem.stock = product.stock;
         existingItem.qty++;
     } else {
         cart.push({
@@ -195,6 +256,7 @@ function addToCart(productId) {
             name: product.name,
             price: product.price,
             image: product.image,
+            stock: product.stock, // Include stock in cart item
             qty: 1
         });
     }
@@ -225,6 +287,26 @@ function updateCartQty(productId, change) {
     // (This shouldn't happen if UI is correct, but handle gracefully)
     if (!item && change < 0) {
         return;
+    }
+    
+    // Check stock before increasing quantity
+    if (change > 0) {
+        const product = PRODUCTS.find(p => p.id === productId);
+        if (product && product.stock !== undefined) {
+            // Update stock in cart item to match current product stock
+            item.stock = product.stock;
+            
+            // Check if current quantity + change would exceed stock
+            if (item.qty + change > product.stock) {
+                // Show user-friendly message
+                if (typeof showToast === 'function') {
+                    showToast(`⚠️ Only ${product.stock} item(s) available in stock. Cannot add more.`, 'warning');
+                } else {
+                    alert(`⚠️ Only ${product.stock} item(s) available in stock. Cannot add more.`);
+                }
+                return;
+            }
+        }
     }
     
     // Item exists, update quantity
@@ -266,15 +348,32 @@ function updateSingleProductState(productId) {
     
     // Check cart state for this specific product only
     const cartItem = cart.find(i => i.id === productId);
+    
+    // Check product stock
+    const product = PRODUCTS.find(p => p.id === productId);
+    const isOutOfStock = product && product.stock !== undefined && product.stock <= 0;
 
-    if (cartItem && cartItem.qty > 0) {
+    if (isOutOfStock) {
+        // Product is out of stock: show out-of-stock button, hide quantity control
+        addBtn.style.display = 'flex';
+        addBtn.disabled = true;
+        addBtn.classList.add('btn-out-of-stock');
+        qtyControl.classList.remove('active');
+        if (qtyValue) {
+            qtyValue.textContent = '1';
+        }
+    } else if (cartItem && cartItem.qty > 0) {
         // Product is in cart: hide add button, show quantity control
         addBtn.style.display = 'none';
+        addBtn.disabled = false;
+        addBtn.classList.remove('btn-out-of-stock');
         qtyControl.classList.add('active');
         qtyValue.textContent = cartItem.qty;
     } else {
         // Product is not in cart: show add button, hide quantity control
         addBtn.style.display = 'flex';
+        addBtn.disabled = false;
+        addBtn.classList.remove('btn-out-of-stock');
         qtyControl.classList.remove('active');
         if (qtyValue) {
             qtyValue.textContent = '1';
@@ -289,25 +388,8 @@ function updateProductStates() {
         const productId = card.dataset.id;
         if (!productId) return;
         
-        // Scope selectors to this specific card only
-        const cartItem = cart.find(i => i.id === productId);
-        const addBtn = card.querySelector('.btn-add-cart');
-        const qtyControl = card.querySelector('.qty-control');
-        const qtyValue = card.querySelector('.qty-value');
-        
-        if (!addBtn || !qtyControl || !qtyValue) return;
-
-        if (cartItem && cartItem.qty > 0) {
-            // Product is in cart: hide add button, show quantity control
-            addBtn.style.display = 'none';
-            qtyControl.classList.add('active');
-            qtyValue.textContent = cartItem.qty;
-        } else {
-            // Product is not in cart: show add button, hide quantity control
-            addBtn.style.display = 'flex';
-            qtyControl.classList.remove('active');
-            qtyValue.textContent = '1';
-        }
+        // Use the single product update function for consistency
+        updateSingleProductState(productId);
     });
 }
 

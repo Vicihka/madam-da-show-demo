@@ -5,6 +5,7 @@ from django.views.decorators.http import require_http_methods
 from django.utils.translation import get_language, activate
 from django.utils import timezone
 from django.db.models import Q
+from django.db import transaction, DatabaseError, IntegrityError
 from django.core.validators import validate_email
 from django.core.exceptions import ValidationError
 from django.utils.html import escape
@@ -26,6 +27,12 @@ from urllib.parse import unquote
 from project.settings import BAKONG_API_BASE, BAKONG_ID, BAKONG_MERCHANT_NAME
 from .models import Product, Customer, Order, OrderItem, PromoCode, Newsletter, Referral, LoyaltyPoint, OrderQRCode, HeroSlide
 from .telegram_webhook import telegram_webhook, set_telegram_webhook
+from .exceptions import (
+    PaymentTimeoutError, PaymentConnectionError, PaymentError,
+    InsufficientStockError, StockValidationError, OrderCreationError,
+    InvalidPromoCodeError
+)
+from .utils.error_handler import handle_api_error
 
 logger = logging.getLogger(__name__)
 
@@ -75,17 +82,26 @@ def send_telegram_notification(order):
                 'parse_mode': 'HTML'
             }, timeout=10)
             
-            if response.status_code == 200:
-                result = response.json()
-                if result.get('ok'):
-                    logger.info(f"✅ Telegram notification sent successfully for order {order.order_number}")
-                    return True
-                else:
-                    logger.error(f"❌ Telegram API returned error: {result.get('description', 'Unknown error')}")
-                    return False
+            response.raise_for_status()  # Raise exception for bad status codes
+            
+            result = response.json()
+            if result.get('ok'):
+                logger.info(f"✅ Telegram notification sent successfully for order {order.order_number}")
+                return True
             else:
-                logger.error(f"❌ Failed to send Telegram notification. Status: {response.status_code}, Response: {response.text}")
+                error_desc = result.get('description', 'Unknown error')
+                logger.error(f"❌ Telegram API returned error: {error_desc}")
                 return False
+                
+        except requests.exceptions.Timeout:
+            logger.error(f"❌ Telegram API timeout for order {order.order_number}")
+            return False
+        except requests.exceptions.ConnectionError:
+            logger.error(f"❌ Telegram API connection error for order {order.order_number}")
+            return False
+        except requests.exceptions.HTTPError as e:
+            logger.error(f"❌ Telegram API HTTP error {e.response.status_code} for order {order.order_number}: {e}")
+            return False
         except Exception as fallback_error:
             logger.error(f"❌ Fallback Telegram notification failed: {str(fallback_error)}", exc_info=True)
             return False
@@ -472,16 +488,16 @@ def newsletter_subscribe(request):
             })
     
     except json.JSONDecodeError:
-        return JsonResponse({
-            'success': False,
-            'message': 'Invalid JSON data'
-        }, status=400)
+        error = ValidationError('Invalid JSON data')
+        context = {'endpoint': 'newsletter_subscribe'}
+        return handle_api_error(error, context=context)
+    except (IntegrityError, DatabaseError) as e:
+        logger.error(f"Database error in newsletter_subscribe: {e}", exc_info=True)
+        context = {'endpoint': 'newsletter_subscribe'}
+        return handle_api_error(e, context=context)
     except Exception as e:
-        logger.error(f"Error in newsletter_subscribe: {str(e)}")
-        return JsonResponse({
-            'success': False,
-            'message': 'An error occurred. Please try again.'
-        }, status=500)
+        context = {'endpoint': 'newsletter_subscribe'}
+        return handle_api_error(e, context=context)
 
 
 @apply_rate_limit('30/m', 'POST')
@@ -544,22 +560,21 @@ def validate_promo_code(request):
             })
         
         except PromoCode.DoesNotExist:
-            return JsonResponse({
-                'success': False,
-                'message': 'Invalid promo code'
-            }, status=404)
+            error = InvalidPromoCodeError('Invalid promo code')
+            context = {'endpoint': 'validate_promo_code', 'code': code}
+            return handle_api_error(error, context=context)
     
     except json.JSONDecodeError:
-        return JsonResponse({
-            'success': False,
-            'message': 'Invalid JSON data'
-        }, status=400)
+        error = ValidationError('Invalid JSON data')
+        context = {'endpoint': 'validate_promo_code'}
+        return handle_api_error(error, context=context)
+    except (IntegrityError, DatabaseError) as e:
+        logger.error(f"Database error in validate_promo_code: {e}", exc_info=True)
+        context = {'endpoint': 'validate_promo_code'}
+        return handle_api_error(e, context=context)
     except Exception as e:
-        logger.error(f"Error in validate_promo_code: {str(e)}")
-        return JsonResponse({
-            'success': False,
-            'message': 'An error occurred. Please try again.'
-        }, status=500)
+        context = {'endpoint': 'validate_promo_code'}
+        return handle_api_error(e, context=context)
 
 
 @apply_rate_limit('30/m', 'POST')
@@ -590,16 +605,16 @@ def check_referral_code(request):
             }, status=404)
     
     except json.JSONDecodeError:
-        return JsonResponse({
-            'success': False,
-            'message': 'Invalid JSON data'
-        }, status=400)
+        error = ValidationError('Invalid JSON data')
+        context = {'endpoint': 'check_referral_code'}
+        return handle_api_error(error, context=context)
+    except (IntegrityError, DatabaseError) as e:
+        logger.error(f"Database error in check_referral_code: {e}", exc_info=True)
+        context = {'endpoint': 'check_referral_code'}
+        return handle_api_error(e, context=context)
     except Exception as e:
-        logger.error(f"Error in check_referral_code: {str(e)}")
-        return JsonResponse({
-            'success': False,
-            'message': 'An error occurred. Please try again.'
-        }, status=500)
+        context = {'endpoint': 'check_referral_code'}
+        return handle_api_error(e, context=context)
 
 
 @apply_rate_limit('30/m', 'POST')
@@ -622,16 +637,16 @@ def calculate_loyalty_points(request):
         })
     
     except json.JSONDecodeError:
-        return JsonResponse({
-            'success': False,
-            'message': 'Invalid JSON data'
-        }, status=400)
+        error = ValidationError('Invalid JSON data')
+        context = {'endpoint': 'calculate_loyalty_points'}
+        return handle_api_error(error, context=context)
+    except (IntegrityError, DatabaseError) as e:
+        logger.error(f"Database error in calculate_loyalty_points: {e}", exc_info=True)
+        context = {'endpoint': 'calculate_loyalty_points'}
+        return handle_api_error(e, context=context)
     except Exception as e:
-        logger.error(f"Error in calculate_loyalty_points: {str(e)}")
-        return JsonResponse({
-            'success': False,
-            'message': 'An error occurred. Please try again.'
-        }, status=500)
+        context = {'endpoint': 'calculate_loyalty_points'}
+        return handle_api_error(e, context=context)
 
 
 @apply_rate_limit('20/m', 'GET')
@@ -757,24 +772,20 @@ def create_khqr(request):
         return JsonResponse(data)
         
     except requests.exceptions.Timeout:
-        return JsonResponse({
-            'error': True,
-            'message': 'Request timeout: Payment gateway did not respond in time',
-            'code': 'TIMEOUT_ERROR'
-        }, status=504)
+        error = PaymentTimeoutError('Payment gateway did not respond in time')
+        context = {'endpoint': 'create_khqr', 'amount': amount, 'currency': currency}
+        return handle_api_error(error, context=context)
     except requests.exceptions.ConnectionError:
-        return JsonResponse({
-            'error': True,
-            'message': 'Connection error: Could not reach payment gateway',
-            'code': 'CONNECTION_ERROR'
-        }, status=503)
+        error = PaymentConnectionError('Could not reach payment gateway')
+        context = {'endpoint': 'create_khqr', 'amount': amount, 'currency': currency}
+        return handle_api_error(error, context=context)
     except Exception as e:
-        logger.error(f"Error in create_khqr: {str(e)}", exc_info=True)
-        return JsonResponse({
-            'error': True,
-            'message': f'An error occurred: {str(e)}',
-            'code': 'SERVER_ERROR'
-        }, status=500)
+        if isinstance(e, PaymentError):
+            context = {'endpoint': 'create_khqr', 'amount': amount, 'currency': currency}
+            return handle_api_error(e, context=context)
+        # For other exceptions, use generic handler
+        context = {'endpoint': 'create_khqr', 'amount': amount, 'currency': currency}
+        return handle_api_error(e, context=context)
 
 
 @apply_rate_limit('30/m', 'GET')
@@ -861,28 +872,25 @@ def check_payment(request):
         return JsonResponse(data)
         
     except requests.exceptions.Timeout:
-        return JsonResponse({
-            'error': True,
-            'message': 'Request timeout: Payment gateway did not respond in time',
-            'code': 'TIMEOUT_ERROR'
-        }, status=504)
+        error = PaymentTimeoutError('Payment gateway did not respond in time')
+        context = {'endpoint': 'check_payment', 'md5': md5}
+        return handle_api_error(error, context=context)
     except requests.exceptions.ConnectionError:
-        return JsonResponse({
-            'error': True,
-            'message': 'Connection error: Could not reach payment gateway',
-            'code': 'CONNECTION_ERROR'
-        }, status=503)
+        error = PaymentConnectionError('Could not reach payment gateway')
+        context = {'endpoint': 'check_payment', 'md5': md5}
+        return handle_api_error(error, context=context)
     except Exception as e:
-        logger.error(f"Error in check_payment: {str(e)}", exc_info=True)
-        return JsonResponse({
-            'error': True,
-            'message': f'An error occurred: {str(e)}',
-            'code': 'SERVER_ERROR'
-        }, status=500)
+        if isinstance(e, PaymentError):
+            context = {'endpoint': 'check_payment', 'md5': md5}
+            return handle_api_error(e, context=context)
+        # For other exceptions, use generic handler
+        context = {'endpoint': 'check_payment', 'md5': md5}
+        return handle_api_error(e, context=context)
 
 
 @csrf_exempt
 @require_http_methods(["POST"])
+@transaction.atomic
 def create_order_on_payment(request):
     """Create order when payment is confirmed - called from frontend"""
     try:
@@ -899,24 +907,92 @@ def create_order_on_payment(request):
         discount_amount = Decimal(str(data.get('discount', 0)))
         items = data.get('items', [])
         
-        # Validate required fields
-        if not all([name, phone, address, province]):
-            return JsonResponse({
-                'error': True,
-                'message': 'Missing required fields'
-            }, status=400)
+        # Validate required fields - check each field individually for better error messages
+        missing_fields = []
+        if not name:
+            missing_fields.append('name')
+        if not phone:
+            missing_fields.append('phone')
+        if not address:
+            missing_fields.append('address')
+        if not province:
+            missing_fields.append('province')
+        
+        if missing_fields:
+            error = ValidationError(f'Missing required fields: {", ".join(missing_fields)}')
+            context = {
+                'endpoint': 'create_order_on_payment',
+                'missing_fields': missing_fields,
+                'received_data': {
+                    'name': bool(name),
+                    'phone': bool(phone),
+                    'address': bool(address),
+                    'province': bool(province)
+                }
+            }
+            return handle_api_error(error, context=context)
         
         if not items:
             return JsonResponse({
-                'error': True,
-                'message': 'No items in order'
+                'success': False,
+                'error': {
+                    'type': 'ValidationError',
+                    'message': 'No items in order'
+                }
             }, status=400)
         
+        # Validate stock availability BEFORE creating order
+        out_of_stock_items = []
+        for item in items:
+            product_id = item.get('id')
+            quantity = int(item.get('qty', 1))
+            
+            if product_id:
+                try:
+                    # Use select_for_update to lock the row and prevent race conditions
+                    product = Product.objects.select_for_update().get(id=product_id, is_active=True)
+                    if product.stock < quantity:
+                        out_of_stock_items.append({
+                            'id': product_id,
+                            'name': product.name,
+                            'available': product.stock,
+                            'requested': quantity
+                        })
+                except Product.DoesNotExist:
+                    # Product doesn't exist or is inactive
+                    out_of_stock_items.append({
+                        'id': product_id,
+                        'name': item.get('name', 'Unknown Product'),
+                        'available': 0,
+                        'requested': quantity
+                    })
+        
+        if out_of_stock_items:
+            item_names = ', '.join([item['name'] for item in out_of_stock_items])
+            error = InsufficientStockError(f'Products out of stock: {item_names}')
+            context = {
+                'endpoint': 'create_order_on_payment',
+                'out_of_stock_items': out_of_stock_items
+            }
+            return handle_api_error(error, context=context)
+        
         # Get or create customer
-        customer, _ = Customer.objects.get_or_create(
-            phone=phone,
-            defaults={'name': name, 'address': address, 'province': province}
-        )
+        try:
+            customer, created = Customer.objects.get_or_create(
+                phone=phone,
+                defaults={'name': name, 'address': address, 'province': province}
+            )
+            # Update customer info if customer already exists but info changed
+            if not created:
+                if customer.name != name or customer.address != address or customer.province != province:
+                    customer.name = name
+                    customer.address = address
+                    customer.province = province
+                    customer.save(update_fields=['name', 'address', 'province'])
+        except IntegrityError as e:
+            logger.error(f"Database error creating/updating customer: {e}", exc_info=True)
+            context = {'endpoint': 'create_order_on_payment', 'phone': phone, 'name': name}
+            return handle_api_error(DatabaseError('Failed to create or update customer'), context=context)
         
         # Determine order status based on payment method
         if payment_method == 'Cash on Delivery':
@@ -924,24 +1000,30 @@ def create_order_on_payment(request):
         else:
             order_status = 'confirmed'
         
-        # Create order WITHOUT order_number - let the model's save() method generate it sequentially
-        order = Order(
-            customer=customer,
-            customer_name=name,
-            customer_phone=phone,
-            customer_address=address,
-            customer_province=province,
-            subtotal=subtotal,
-            shipping_fee=Decimal('0.00'),
-            discount_amount=discount_amount,
-            total=total,
-            payment_method=payment_method,
-            status=order_status,
-            customer_received=False,  # Explicitly set to False for new orders
-            payment_received=False  # Explicitly set to False for new orders
-        )
-        # Save to trigger order_number generation (sequential)
-        order.save()
+        try:
+            # Create order WITHOUT order_number - let the model's save() method generate it sequentially
+            order = Order(
+                customer=customer,
+                customer_name=name,
+                customer_phone=phone,
+                customer_address=address,
+                customer_province=province,
+                subtotal=subtotal,
+                shipping_fee=Decimal('0.00'),
+                discount_amount=discount_amount,
+                total=total,
+                payment_method=payment_method,
+                status=order_status,
+                customer_received=False,  # Explicitly set to False for new orders
+                payment_received=False  # Explicitly set to False for new orders
+            )
+            # Save to trigger order_number generation (sequential)
+            order.save()
+        except (IntegrityError, DatabaseError) as e:
+            logger.error(f"Database error creating order: {e}", exc_info=True)
+            context = {'endpoint': 'create_order_on_payment', 'customer_phone': phone}
+            error = OrderCreationError('Failed to create order')
+            return handle_api_error(error, context=context)
         
         # Send WebSocket message for new order
         try:
@@ -994,28 +1076,45 @@ def create_order_on_payment(request):
         order.check_suspicious()
         order.save()
         
-        # Create order items
-        for item in items:
-            product_id = item.get('id')
-            product_name = item.get('name', 'Unknown Product')
-            product_price = Decimal(str(item.get('price', 0)))
-            quantity = int(item.get('qty', 1))
-            
-            product = None
-            if product_id:
-                try:
-                    product = Product.objects.get(id=product_id)
-                except Product.DoesNotExist:
-                    pass
-            
-            OrderItem.objects.create(
-                order=order,
-                product=product,
-                product_name=product_name,
-                product_price=product_price,
-                quantity=quantity,
-                subtotal=product_price * quantity
-            )
+        # Create order items and decrement stock
+        try:
+            for item in items:
+                product_id = item.get('id')
+                product_name = item.get('name', 'Unknown Product')
+                product_price = Decimal(str(item.get('price', 0)))
+                quantity = int(item.get('qty', 1))
+                
+                product = None
+                if product_id:
+                    try:
+                        # Use select_for_update to lock the row
+                        product = Product.objects.select_for_update().get(id=product_id)
+                        # Decrement stock
+                        if product.stock >= quantity:
+                            product.stock -= quantity
+                            product.save(update_fields=['stock'])
+                        else:
+                            # Stock changed between validation and order creation
+                            raise InsufficientStockError(f'{product.name} is now out of stock')
+                    except Product.DoesNotExist:
+                        pass
+                
+                OrderItem.objects.create(
+                    order=order,
+                    product=product,
+                    product_name=product_name,
+                    product_price=product_price,
+                    quantity=quantity,
+                    subtotal=product_price * quantity
+                )
+        except (IntegrityError, DatabaseError, InsufficientStockError) as e:
+            # Transaction will automatically roll back
+            logger.error(f"Error creating order items: {e}", exc_info=True)
+            context = {'endpoint': 'create_order_on_payment', 'order_number': order.order_number}
+            if isinstance(e, InsufficientStockError):
+                return handle_api_error(e, context=context)
+            error = OrderCreationError('Failed to create order items')
+            return handle_api_error(error, context=context)
         
         # Send WebSocket message for new order
         try:
@@ -1080,17 +1179,16 @@ def create_order_on_payment(request):
         })
         
     except json.JSONDecodeError:
-        logger.error("Invalid JSON data received for order creation.")
-        return JsonResponse({
-            'error': True,
-            'message': 'Invalid JSON data'
-        }, status=400)
+        error = ValidationError('Invalid JSON data')
+        context = {'endpoint': 'create_order_on_payment'}
+        return handle_api_error(error, context=context)
+    except (DatabaseError, IntegrityError) as e:
+        context = {'endpoint': 'create_order_on_payment'}
+        error = OrderCreationError('Database error occurred during order creation')
+        return handle_api_error(error, context=context)
     except Exception as e:
-        logger.error(f"Error creating order on payment: {str(e)}", exc_info=True)
-        return JsonResponse({
-            'error': True,
-            'message': f'An error occurred: {str(e)}'
-        }, status=500)
+        context = {'endpoint': 'create_order_on_payment'}
+        return handle_api_error(e, context=context)
 
 
 # ========== COD (Cash on Delivery) Automation Views ==========
@@ -1555,11 +1653,8 @@ def customer_lookup(request):
             })
             
     except Exception as e:
-        logger.error(f"Error in customer_lookup: {str(e)}", exc_info=True)
-        return JsonResponse({
-            'success': False,
-            'message': 'An error occurred while looking up customer'
-        }, status=500)
+        context = {'endpoint': 'customer_lookup'}
+        return handle_api_error(e, context=context)
 
 
 @csrf_exempt
@@ -1639,8 +1734,5 @@ def track_order_api(request):
             'message': 'Invalid JSON data'
         }, status=400)
     except Exception as e:
-        logger.error(f"Error in track_order_api: {str(e)}", exc_info=True)
-        return JsonResponse({
-            'success': False,
-            'message': 'An error occurred while tracking your order'
-        }, status=500)
+        context = {'endpoint': 'track_order_api'}
+        return handle_api_error(e, context=context)

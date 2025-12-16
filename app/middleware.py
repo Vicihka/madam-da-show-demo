@@ -75,6 +75,16 @@ class SecurityHeadersMiddleware(MiddlewareMixin):
     """Add comprehensive security headers to all responses"""
     
     def process_response(self, request, response):
+        # Skip processing for media files FIRST (before any processing)
+        # This prevents middleware from interfering with media file serving
+        if request.path.startswith('/media/'):
+            return response
+        
+        # Skip processing for error responses (4xx, 5xx)
+        # This prevents middleware from interfering with error pages
+        if response.status_code >= 400:
+            return response
+        
         # Content Security Policy
         csp = (
             "default-src 'self'; "
@@ -95,11 +105,6 @@ class SecurityHeadersMiddleware(MiddlewareMixin):
         # X-XSS-Protection is deprecated and not needed with CSP
         response['Referrer-Policy'] = 'strict-origin-when-cross-origin'
         response['Permissions-Policy'] = 'geolocation=(), microphone=(), camera=(self)'
-        
-        # Remove security headers from media files (not needed and causes warnings)
-        if request.path.startswith('/media/'):
-            response.pop('Content-Security-Policy', None)
-            response.pop('X-XSS-Protection', None)
         
         # Remove server information
         if 'Server' in response:

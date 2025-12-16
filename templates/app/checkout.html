@@ -118,7 +118,7 @@
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="form-input-icon" viewBox="2.75 0.5 18.5 23">
                                         <path fill-rule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" clip-rule="evenodd"></path>
                                     </svg>
-                                    <input class="form-input" type="text" id="buyer-name" name="buyerName" placeholder="Ex: John Doe" required>
+                                    <input class="form-input" type="text" id="buyer-name" name="buyerName" placeholder="Ex: John Doe" autocomplete="name" required>
                                 </label>
                             </div>
                             <div class="form-group">
@@ -127,7 +127,7 @@
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="form-input-icon" viewBox="-1 -1 26 26">
                                         <path fill-rule="evenodd" d="M1.5 4.5a3 3 0 013-3h1.372c.86 0 1.61.586 1.819 1.42l1.105 4.423a1.875 1.875 0 01-.694 1.955l-1.293.97c-.135.101-.164.249-.126.352a11.285 11.285 0 006.697 6.697c.103.038.25.009.352-.126l.97-1.293a1.875 1.875 0 011.955-.694l4.423 1.105c.834.209 1.42.959 1.42 1.82V19.5a3 3 0 01-3 3h-2.25C8.552 22.5 1.5 15.448 1.5 6.75V4.5z" clip-rule="evenodd"></path>
                                     </svg>
-                                    <input class="form-input" type="tel" id="buyer-phone" name="buyerPhoneNumber" placeholder="Ex: 0xx xxx xxx" required>
+                                    <input class="form-input" type="tel" id="buyer-phone" name="buyerPhoneNumber" placeholder="Ex: 0xx xxx xxx" autocomplete="tel" required>
                                 </label>
                             </div>
                         </div>
@@ -149,7 +149,7 @@
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="form-input-icon" viewBox="0.25 0.38 23.5 23.23">
                                         <path fill-rule="evenodd" d="M8.161 2.58a1.875 1.875 0 011.678 0l4.993 2.498c.106.052.23.052.336 0l3.869-1.935A1.875 1.875 0 0121.75 4.82v12.485c0 .71-.401 1.36-1.037 1.677l-4.875 2.437a1.875 1.875 0 01-1.676 0l-4.994-2.497a.375.375 0 00-.336 0l-3.868 1.935A1.875 1.875 0 012.25 19.18V6.695c0-.71.401-1.36 1.036-1.677l4.875-2.437zM9 6a.75.75 0 01.75.75V15a.75.75 0 01-1.5 0V6.75A.75.75 0 019 6zm6.75 3a.75.75 0 00-1.5 0v8.25a.75.75 0 001.5 0V9z" clip-rule="evenodd"></path>
                                     </svg>
-                                    <input class="form-input" type="text" id="delivery-address" name="deliveryAddress" placeholder="Ex: Toul Tompung" required>
+                                    <input class="form-input" type="text" id="delivery-address" name="deliveryAddress" placeholder="Ex: Toul Tompung" autocomplete="street-address" required>
                                 </label>
                             </div>
                             <div class="form-group">
@@ -158,7 +158,7 @@
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="form-select-icon">
                                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.944 11.944 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418"></path>
                                     </svg>
-                                    <select class="form-select" id="delivery-province" name="deliveryProvince" required>
+                                    <select class="form-select" id="delivery-province" name="deliveryProvince" autocomplete="address-level1" required>
                                         <option value="">Select a province</option>
                                         <option value="24">Phnom Penh</option>
                                         <option value="7">Kandal</option>
@@ -190,7 +190,7 @@
                             </div>
                             <div class="form-group">
                                 <label class="form-label" for="delivery-note">Note:</label>
-                                <textarea class="form-textarea" id="delivery-note" name="deliveryNote" rows="3"></textarea>
+                                <textarea class="form-textarea" id="delivery-note" name="deliveryNote" rows="3" autocomplete="off" placeholder="Optional delivery notes"></textarea>
                             </div>
                             <div class="telegram-toggle">
                                 <button type="button" class="toggle-switch" id="telegram-toggle" data-state="unchecked" onclick="toggleTelegram(this)">
@@ -210,7 +210,7 @@
                             <div class="form-group">
                                 <label class="form-label" for="promo-code">Enter promo code:</label>
                                 <div style="display: flex; gap: 8px;">
-                                    <input class="form-input" type="text" id="promo-code" name="promoCode" placeholder="Enter code" style="padding-left: 16px; flex: 1;">
+                                    <input class="form-input" type="text" id="promo-code" name="promoCode" placeholder="Enter code" autocomplete="off" style="padding-left: 16px; flex: 1;">
                                     <button type="button" class="promo-apply-btn" id="promo-apply-btn" onclick="applyPromoCode()">
                                         Apply
                                     </button>

@@ -245,6 +245,67 @@
                 return;
             }
             
+            // Check for out-of-stock items in cart
+            const outOfStockItems = cart.filter(item => item.stock !== undefined && item.stock <= 0);
+            
+            // If there are out-of-stock items, show warning and disable checkout
+            if (outOfStockItems.length > 0) {
+                const outOfStockNames = outOfStockItems.map(item => item.name).join(', ');
+                // Render cart items first (but mark out-of-stock ones)
+                checkoutItems.innerHTML = cart.map(item => {
+                    const isOutOfStock = item.stock !== undefined && item.stock <= 0;
+                    return `
+                        <div class="cart-item" style="${isOutOfStock ? 'opacity: 0.5; border-left: 4px solid #dc2626;' : ''}">
+                            <div class="cart-item-content">
+                                <img src="${item.image}" alt="${item.name}" class="cart-item-image" loading="lazy" width="112" height="112" decoding="async" fetchpriority="low">
+                                <div class="cart-item-details">
+                                    <p class="cart-item-name">
+                                        ${item.name}
+                                        ${isOutOfStock ? '<span style="color: #dc2626; font-weight: 600; margin-left: 8px;">(Out of Stock)</span>' : ''}
+                                    </p>
+                                    <div class="qty-input-wrapper">
+                                        <div class="qty-buttons-inner">
+                                            <button class="qty-btn" onclick="updateCartQty('${item.id}', -1)" ${isOutOfStock ? 'disabled' : ''}>
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke-width="1.5" stroke="currentColor" style="width: 16px; height: 16px;" viewBox="0.75 8.25 22.5 7.5">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12h-15"></path>
+                                                </svg>
+                                            </button>
+                                            <input class="qty-input" type="number" step="1" placeholder="0" value="${item.qty}" readonly>
+                                            <button class="qty-btn" onclick="updateCartQty('${item.id}', 1)" ${isOutOfStock ? 'disabled' : ''}>
+                                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" style="width: 16px; height: 16px;" viewBox="1 1 22 22">
+                                                    <path d="M5 12h14M12 5v14"></path>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="cart-item-remove">
+                                <button class="remove-btn remove-btn-desktop" onclick="removeFromCart('${item.id}')">Remove</button>
+                                <button class="remove-btn remove-btn-mobile" onclick="removeFromCart('${item.id}')">Remove</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('') + `
+                    <div class="cart-error-notice" style="background: #fee2e2; border: 2px solid #dc2626; border-radius: 8px; padding: 16px; margin-top: 16px; color: #991b1b;">
+                        <p style="font-weight: 600; margin-bottom: 8px; font-size: 16px;">⚠️ Out of Stock Items Detected</p>
+                        <p style="margin-bottom: 12px;">The following items are no longer available: <strong>${outOfStockNames}</strong></p>
+                        <p style="margin-bottom: 12px; font-size: 14px;">Please remove them from your cart before proceeding to checkout.</p>
+                        <button onclick="removeOutOfStockItems()" style="background: #dc2626; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 600; width: 100%;">
+                            Remove All Out of Stock Items
+                        </button>
+                    </div>
+                `;
+                
+                summaryItems.innerHTML = '<div class="summary-item"><p class="summary-item-name" style="color: #dc2626;">Cannot checkout with out-of-stock items</p></div>';
+                summaryTotal.textContent = '$0.00';
+                purchaseBtn.disabled = true;
+                purchaseBtn.style.opacity = '0.5';
+                purchaseBtn.style.cursor = 'not-allowed';
+                purchaseBtn.title = 'Remove out-of-stock items to proceed';
+                return;
+            }
+            
             const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
             const deliveryFee = 0;
             const discountAmount = window.promoDiscount || 0;
@@ -390,6 +451,19 @@
         function updateCartQty(productId, change) {
             const item = cart.find(i => i.id === productId);
             if (!item) return;
+            
+            // Check stock before increasing quantity
+            if (change > 0) {
+                if (item.stock !== undefined && item.stock <= 0) {
+                    showToast(`⚠️ This item is out of stock. Please remove it from your cart.`, 'error');
+                    return;
+                }
+                if (item.stock !== undefined && item.qty + change > item.stock) {
+                    showToast(`⚠️ Only ${item.stock} item(s) available in stock. Cannot add more.`, 'warning');
+                    return;
+                }
+            }
+            
             item.qty += change;
             if (item.qty <= 0) {
                 cart = cart.filter(i => i.id !== productId);
@@ -426,6 +500,62 @@
             updateCheckoutView();
         }
         
+        // Remove all out-of-stock items from cart
+        function removeOutOfStockItems() {
+            const beforeCount = cart.length;
+            cart = cart.filter(item => {
+                // Keep item only if stock is undefined (unknown) or stock > 0
+                return item.stock === undefined || item.stock > 0;
+            });
+            
+            const removedCount = beforeCount - cart.length;
+            
+            // Save cleaned cart
+            if (cart.length === 0) {
+                try {
+                    localStorage.setItem('madamda_cart', '[]');
+                } catch (e) {
+                    console.error('Error clearing cart:', e);
+                }
+            } else {
+                debouncedSaveCart();
+            }
+            
+            // Show notification
+            if (removedCount > 0) {
+                showToast(`Removed ${removedCount} out-of-stock item(s) from cart`, 'info');
+            }
+            
+            // Update view
+            updateCheckoutView();
+        }
+        
+        // Clean up cart on checkout page load - remove out-of-stock items
+        function cleanupCartOnLoad() {
+            const outOfStockItems = cart.filter(item => item.stock !== undefined && item.stock <= 0);
+            if (outOfStockItems.length > 0) {
+                const itemNames = outOfStockItems.map(item => item.name).join(', ');
+                cart = cart.filter(item => item.stock === undefined || item.stock > 0);
+                
+                // Save cleaned cart
+                if (cart.length === 0) {
+                    try {
+                        localStorage.setItem('madamda_cart', '[]');
+                    } catch (e) {
+                        console.error('Error clearing cart:', e);
+                    }
+                } else {
+                    debouncedSaveCart();
+                }
+                
+                // Show notification
+                showToast(`⚠️ Removed ${outOfStockItems.length} out-of-stock item(s): ${itemNames}`, 'warning');
+            }
+        }
+        
+        // Run cleanup on page load
+        cleanupCartOnLoad();
+        
         function toggleTelegram(button) {
             const isChecked = button.getAttribute('data-state') === 'checked';
             button.setAttribute('data-state', isChecked ? 'unchecked' : 'checked');
@@ -453,7 +583,10 @@
                 const name = DOMCache.buyerName?.value || '';
                 const phone = DOMCache.buyerPhone?.value || '';
                 const address = DOMCache.deliveryAddress?.value || '';
-                const province = DOMCache.deliveryProvince?.value || '';
+                const provinceSelect = DOMCache.deliveryProvince;
+                const province = (provinceSelect && provinceSelect.selectedIndex > 0 && provinceSelect.options[provinceSelect.selectedIndex].value) 
+                    ? provinceSelect.options[provinceSelect.selectedIndex].text 
+                    : '';
             
             if (!name || !phone || !address || !province) {
                 showToast('Please fill in all required fields', 'warning');
@@ -673,7 +806,11 @@
             const address = DOMCache.deliveryAddress?.value || '';
             const provinceSelect = DOMCache.deliveryProvince;
             if (!provinceSelect) throw new Error('Province field not found');
-            const province = provinceSelect.options[provinceSelect.selectedIndex].text;
+            
+            // Get selected province - use text if value exists, otherwise empty
+            const selectedIndex = provinceSelect.selectedIndex;
+            const selectedOption = provinceSelect.options[selectedIndex];
+            const province = (selectedOption.value && selectedIndex > 0) ? selectedOption.text : '';
             const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
             const discountAmount = window.promoDiscount || 0;
             const total = Math.round(Math.max(0, subtotal + 0 - discountAmount) * 100) / 100;
@@ -704,15 +841,26 @@
                 });
                 
                 const result = await response.json();
-                if (result.success) {
-                    console.log('COD Order created:', result.order_number);
-                    window.lastOrderNumber = result.order_number;
-                    window.currentOrderNumber = result.order_number;
-                } else {
-                    throw new Error(result.message || 'Failed to create order');
+                if (!response.ok || !result.success) {
+                    // Get error message from response with better handling
+                    let errorMessage = result.error?.message || result.message || `Failed to create order (HTTP ${response.status})`;
+                    
+                    // Special handling for out of stock errors
+                    if (result.error?.type === 'InsufficientStockError' || errorMessage.includes('out of stock')) {
+                        errorMessage = `⚠️ Some items in your cart are out of stock. Please remove them and try again.`;
+                    }
+                    
+                    console.error('COD Order creation failed:', result);
+                    throw new Error(errorMessage);
                 }
+                
+                console.log('COD Order created:', result.order_number);
+                window.lastOrderNumber = result.order_number;
+                window.currentOrderNumber = result.order_number;
             } catch (error) {
                 console.error('Error creating COD order:', error);
+                // Show user-friendly error message
+                showToast(error.message || 'Failed to create order. Please try again.', 'error');
                 throw error;
             }
         }
@@ -727,7 +875,10 @@
                 console.error('Province field not found');
                 return;
             }
-            const province = provinceSelect.options[provinceSelect.selectedIndex].text;
+            // Get selected province - use text if value exists, otherwise empty
+            const selectedIndex = provinceSelect.selectedIndex;
+            const selectedOption = provinceSelect.options[selectedIndex];
+            const province = (selectedOption.value && selectedIndex > 0) ? selectedOption.text : '';
             const paymentMethod = getSelectedPaymentMethod();
             const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
             const discountAmount = window.promoDiscount || 0;
@@ -771,15 +922,27 @@
                 });
                 
                 const result = await response.json();
-                if (result.success) {
-                    console.log('Order created and notification sent:', result.order_number);
-                    // Store the actual sequential order number from backend for redirect
-                    window.lastOrderNumber = result.order_number;
-                } else {
-                    console.error('Failed to create order:', result.message);
+                if (!response.ok || !result.success) {
+                    // Get error message from response
+                    let errorMessage = result.error?.message || result.message || `Failed to create order (HTTP ${response.status})`;
+                    
+                    // Special handling for out of stock errors
+                    if (result.error?.type === 'InsufficientStockError' || errorMessage.includes('out of stock')) {
+                        errorMessage = `⚠️ Some items in your cart are out of stock. Please remove them and try again.`;
+                    }
+                    
+                    console.error('Order creation failed:', result);
+                    showToast(errorMessage, 'error');
+                    throw new Error(errorMessage);
                 }
+                
+                console.log('Order created and notification sent:', result.order_number);
+                // Store the actual sequential order number from backend for redirect
+                window.lastOrderNumber = result.order_number;
             } catch (error) {
                 console.error('Error creating order:', error);
+                showToast(error.message || 'Failed to create order. Please try again.', 'error');
+                throw error;
             }
         }
         
@@ -808,7 +971,10 @@
                 console.error('Province field not found');
                 return;
             }
-            const province = provinceSelect.options[provinceSelect.selectedIndex].text;
+            // Get selected province - use text if value exists, otherwise empty
+            const selectedIndex = provinceSelect.selectedIndex;
+            const selectedOption = provinceSelect.options[selectedIndex];
+            const province = (selectedOption.value && selectedIndex > 0) ? selectedOption.text : '';
             const paymentMethod = getSelectedPaymentMethod();
             const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
             const discountAmount = window.promoDiscount || 0;
@@ -1149,3 +1315,4 @@
         window.closeModal = closeModal;
         window.updateCartQty = updateCartQty;
         window.removeFromCart = removeFromCart;
+        window.removeOutOfStockItems = removeOutOfStockItems;
