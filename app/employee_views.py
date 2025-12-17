@@ -184,6 +184,7 @@ def employee_update_status(request, order_number):
                 'payment_method': order.payment_method,
                 'created_at': order.created_at.isoformat(),
                 'items': items_data,
+                'notes': order.notes or '',  # Include delivery notes for real-time updates
                 'customer_received': order.customer_received,
                 'customer_received_at': order.customer_received_at.isoformat() if order.customer_received_at else None,
                 'customer_received_by': order.customer_received_by,
@@ -266,6 +267,7 @@ def serialize_order(order):
         'status_display': order.get_status_display(),
         'created_at': order.created_at.isoformat(),
         'items': items,
+        'notes': order.notes or '',  # Include delivery notes for employee dashboard
         'customer_received': order.customer_received,
         'customer_received_at': order.customer_received_at.isoformat() if order.customer_received_at else None,
         'customer_received_by': order.customer_received_by,

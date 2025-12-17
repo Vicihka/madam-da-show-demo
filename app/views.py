@@ -901,6 +901,7 @@ def create_order_on_payment(request):
         phone = escape(data.get('phone', '').strip())
         address = escape(data.get('address', '').strip())
         province = escape(data.get('province', '').strip())
+        delivery_note = escape(data.get('delivery_note', '').strip())
         payment_method = data.get('payment_method', 'KHQR')
         total = Decimal(str(data.get('total', 0)))
         subtotal = Decimal(str(data.get('subtotal', 0)))
@@ -986,6 +987,7 @@ def create_order_on_payment(request):
                 customer_phone=phone,
                 customer_address=address,
                 customer_province=province,
+                notes=delivery_note if delivery_note else None,  # Save delivery note to Order.notes field
                 subtotal=subtotal,
                 shipping_fee=Decimal('0.00'),
                 discount_amount=discount_amount,
@@ -1025,6 +1027,7 @@ def create_order_on_payment(request):
                         'subtotal': str(subtotal)
                     })
                 
+                order.refresh_from_db()  # Refresh to get notes field
                 order_data = {
                     'order_id': order.id,
                     'order_number': order.order_number,
@@ -1037,7 +1040,8 @@ def create_order_on_payment(request):
                     'total_amount': str(order.total),
                     'payment_method': order.payment_method,
                     'created_at': order.created_at.isoformat(),
-                    'items': items_data
+                    'items': items_data,
+                    'notes': order.notes or ''  # Include delivery notes for real-time updates
                 }
                 
                 async_to_sync(channel_layer.group_send)(
@@ -1118,7 +1122,7 @@ def create_order_on_payment(request):
                         'subtotal': str(subtotal)
                     })
                 
-                order.refresh_from_db()
+                order.refresh_from_db()  # Refresh to get notes field
                 order_data = {
                     'order_id': order.id,
                     'order_number': order.order_number,
@@ -1131,7 +1135,8 @@ def create_order_on_payment(request):
                     'total_amount': str(order.total),
                     'payment_method': order.payment_method,
                     'created_at': order.created_at.isoformat(),
-                    'items': items_data
+                    'items': items_data,
+                    'notes': order.notes or ''  # Include delivery notes for real-time updates
                 }
                 
                 async_to_sync(channel_layer.group_send)(
@@ -1221,6 +1226,7 @@ def cod_confirmation_view(request, order_number=None):
                                     'subtotal': str(item.subtotal)
                                 } for item in items]
                                 
+                                order.refresh_from_db()  # Refresh to get notes field
                                 order_data = {
                                     'order_id': order.id,
                                     'order_number': order.order_number,
@@ -1234,6 +1240,7 @@ def cod_confirmation_view(request, order_number=None):
                                     'payment_method': order.payment_method,
                                     'created_at': order.created_at.isoformat(),
                                     'items': items_data,
+                                    'notes': order.notes or '',  # Include delivery notes for real-time updates
                                     'payment_received': order.payment_received,
                                     'payment_received_at': order.payment_received_at.isoformat() if order.payment_received_at else None,
                                     'customer_received': order.customer_received,
@@ -1320,6 +1327,7 @@ def cod_confirmation_view(request, order_number=None):
                         'subtotal': str(item.subtotal)
                     } for item in items]
                     
+                    order.refresh_from_db()  # Refresh to get notes field
                     order_data = {
                         'order_id': order.id,
                         'order_number': order.order_number,
@@ -1331,6 +1339,7 @@ def cod_confirmation_view(request, order_number=None):
                         'payment_method': order.payment_method,
                         'created_at': order.created_at.isoformat(),
                         'items': items_data,
+                        'notes': order.notes or '',  # Include delivery notes for real-time updates
                         'payment_received': order.payment_received,
                         'payment_received_at': order.payment_received_at.isoformat() if order.payment_received_at else None,
                         'customer_received': order.customer_received,
@@ -1428,6 +1437,7 @@ def cod_confirm_api(request):
                         'subtotal': str(item.subtotal)
                     } for item in items]
                     
+                    order.refresh_from_db()  # Refresh to get notes field
                     order_data = {
                         'order_id': order.id,
                         'order_number': order.order_number,
@@ -1441,6 +1451,7 @@ def cod_confirm_api(request):
                         'payment_method': order.payment_method,
                         'created_at': order.created_at.isoformat(),
                         'items': items_data,
+                        'notes': order.notes or '',  # Include delivery notes for real-time updates
                         'payment_received': order.payment_received,
                         'payment_received_at': order.payment_received_at.isoformat() if order.payment_received_at else None,
                         'customer_received': order.customer_received,

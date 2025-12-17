@@ -884,6 +884,12 @@
                             <span class="info-value">${customerReceivedHTML}</span>
                         </div>
                         ${paymentStatusHTML}
+                        ${order.notes ? `
+                        <div class="info-item" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e5e7eb;">
+                            <span class="info-label" style="color: #6b7280; font-weight: 600;">📝 Delivery Note</span>
+                            <span class="info-value" style="color: #1f2937; white-space: pre-wrap; word-break: break-word;">${order.notes}</span>
+                        </div>
+                        ` : ''}
                     </div>
                     ${itemsHTML}
                     <div class="order-actions">${actionsHTML}</div>
