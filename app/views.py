@@ -902,6 +902,7 @@ def create_order_on_payment(request):
         address = escape(data.get('address', '').strip())
         province = escape(data.get('province', '').strip())
         delivery_note = escape(data.get('delivery_note', '').strip())
+        notify_via_telegram = data.get('notify_via_telegram', True)  # Default to True if not specified
         payment_method = data.get('payment_method', 'KHQR')
         total = Decimal(str(data.get('total', 0)))
         subtotal = Decimal(str(data.get('subtotal', 0)))
@@ -1149,13 +1150,16 @@ def create_order_on_payment(request):
         except Exception as e:
             logger.error(f"Error sending WebSocket message for new order: {str(e)}", exc_info=True)
         
-        # Send Telegram notification immediately when payment is confirmed
+        # Send Telegram notification immediately when payment is confirmed (if enabled)
         order.refresh_from_db()
-        try:
-            logger.info(f"Payment confirmed - Order created: {order.order_number}, sending Telegram notification...")
-            send_telegram_notification(order)
-        except Exception as e:
-            logger.error(f"Failed to send Telegram notification: {str(e)}", exc_info=True)
+        if notify_via_telegram and settings.TELEGRAM_ENABLED:
+            try:
+                logger.info(f"Payment confirmed - Order created: {order.order_number}, sending Telegram notification...")
+                send_telegram_notification(order)
+            except Exception as e:
+                logger.error(f"Failed to send Telegram notification: {str(e)}", exc_info=True)
+        elif not notify_via_telegram:
+            logger.info(f"Telegram notification skipped for order {order.order_number} (user opted out)")
         
         return JsonResponse({
             'success': True,
@@ -1547,7 +1551,7 @@ def track_order_view(request):
         'order_number': order_number,
         'phone': phone,
     }
-    return render(request, 'app/track_order.html', context)
+    return render(request, 'app/shop/track_order.html', context)
 
 
 @csrf_exempt
