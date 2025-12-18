@@ -84,7 +84,7 @@ def employee_dashboard(request):
         'total_out': orders_out.count(),
     }
     
-    return render(request, 'app/employee_dashboard.html', context)
+    return render(request, 'app/employee/dashboard.html', context)
 
 
 @require_http_methods(["GET"])
@@ -106,7 +106,7 @@ def employee_order_detail(request, order_number):
         'needs_qr': needs_qr,
     }
     
-    return render(request, 'app/employee_order_detail.html', context)
+    return render(request, 'app/employee/order_detail.html', context)
 
 
 @csrf_exempt
@@ -242,7 +242,7 @@ def employee_print_qr(request, order_number):
         'employee_view': True,
     }
     
-    return render(request, 'app/cod_print.html', context)
+    return render(request, 'app/cod/print.html', context)
 
 
 def serialize_order(order):

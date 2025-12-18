@@ -8,9 +8,9 @@
     <title>MADAM DA | Checkout</title>
     
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="{% static 'images/favicon.png' %}">
-    <link rel="shortcut icon" type="image/png" href="{% static 'images/favicon.png' %}">
-    <link rel="apple-touch-icon" href="{% static 'images/favicon.png' %}">
+    <link rel="icon" type="image/png" href="{% static 'common/images/favicon.png' %}">
+    <link rel="shortcut icon" type="image/png" href="{% static 'common/images/favicon.png' %}">
+    <link rel="apple-touch-icon" href="{% static 'common/images/favicon.png' %}">
     
     <!-- Preload critical resources -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -25,7 +25,7 @@
     <link href="https://fonts.googleapis.com/css2?family=AkbalthomMonstera&family=Dangrek&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
     <noscript><link href="https://fonts.googleapis.com/css2?family=AkbalthomMonstera&family=Dangrek&display=swap" rel="stylesheet"></noscript>
     
-    <link rel="stylesheet" href="{% static 'css/checkout.css' %}">
+    <link rel="stylesheet" href="{% static 'shop/css/checkout.css' %}">
 </head>
 <body>
     <header>
@@ -55,7 +55,7 @@
             </div>
             <div class="logo" onclick="window.location.href='{% url 'shop' %}'">
                 <div class="logo-icon">
-                    <img src="{% static 'images/madam-da-logo.png' %}" alt="MADAM DA Logo" onerror="this.style.display='none'; this.parentElement.innerHTML='MD';">
+                    <img src="{% static 'common/images/logos/madam-da-logo.png' %}" alt="MADAM DA Logo" onerror="this.style.display='none'; this.parentElement.innerHTML='MD';">
                 </div>
                 <h1>MADAM DA</h1>
             </div>
@@ -219,7 +219,7 @@
                             <div class="payment-options">
                                 <div class="payment-option selected" data-payment="khqr" onclick="selectPayment(this)">
                                     <div class="payment-option-content">
-                                        <img alt="KHQR" loading="lazy" width="32" height="32" decoding="async" class="payment-icon" src="{% static 'images/bakong-logo.svg' %}" onerror="this.style.display='none'">
+                                        <img alt="KHQR" loading="lazy" width="32" height="32" decoding="async" class="payment-icon" src="{% static 'common/images/logos/bakong-logo.svg' %}" onerror="this.style.display='none'">
                                         <div class="payment-details">
                                             <p class="payment-name">KHQR</p>
                                             <p class="payment-desc">Scan to pay with any banking app</p>
@@ -291,7 +291,7 @@
             shop: '{% url "shop" %}'
         };
     </script>
-    <script src="{% static 'js/checkout.js' %}"></script>
+    <script src="{% static 'shop/js/checkout.js' %}"></script>
 </body>
 </html>
 

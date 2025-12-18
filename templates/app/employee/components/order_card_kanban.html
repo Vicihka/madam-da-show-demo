@@ -1,0 +1,94 @@
+{% load static %}
+<div class="order-card" data-order="{{ order.order_number }}" 
+     data-customer-name="{{ order.customer_name|lower }}" 
+     data-customer-phone="{{ order.customer_phone|lower }}"
+     data-created-at="{{ order.created_at.isoformat }}">
+    <div class="card-top">
+        <span class="order-number">#{{ order.order_number }}</span>
+        <span class="time-badge" data-time="{{ order.created_at.isoformat }}">
+            {{ order.created_at|timesince }} ago
+        </span>
+    </div>
+    
+    <div class="customer-section">
+        <div class="avatar">
+            {% if order.customer_name %}
+                {{ order.customer_name|slice:":2"|upper }}
+            {% else %}
+                U
+            {% endif %}
+        </div>
+        <div class="customer-info">
+            <div class="customer-name">{{ order.customer_name|default:"Unknown Customer" }}</div>
+            <div class="customer-phone">{{ order.customer_phone|default:"No phone" }}</div>
+        </div>
+    </div>
+    
+    <div class="tags-row">
+        {% if order.payment_method == "Cash on Delivery" %}
+            <span class="tag cod">💵 COD</span>
+        {% else %}
+            <span class="tag khqr">📱 {{ order.payment_method|default:"Paid" }}</span>
+        {% endif %}
+        
+        {% if order.payment_received or order.payment_method != "Cash on Delivery" %}
+            <span class="tag paid">✅ Paid</span>
+        {% endif %}
+    </div>
+    
+    {% if show_items and order.items.all %}
+    <div style="margin-bottom: 10px;">
+        {% for item in order.items.all|slice:":2" %}
+            <div style="font-size: 0.75rem; color: var(--text-muted); padding: 2px 0;">
+                • {{ item.product.name }} x{{ item.quantity }}
+            </div>
+        {% endfor %}
+        {% if order.items.all.count > 2 %}
+            <div style="font-size: 0.7rem; color: var(--text-dim); padding: 2px 0;">
+                +{{ order.items.all.count|add:"-2" }} more items
+            </div>
+        {% endif %}
+    </div>
+    {% endif %}
+    
+    <div class="card-footer">
+        <div class="price">${{ order.total_amount|floatformat:2 }}</div>
+    </div>
+    
+    <div class="card-actions">
+        {% if order.status == "pending" or order.status == "confirmed" %}
+            <button onclick="window.updateStatus('{{ order.order_number }}', 'preparing')" class="btn-c process-btn">
+                👨‍🍳 Start
+            </button>
+        {% elif order.status == "preparing" %}
+            {% if order.payment_method == "Cash on Delivery" %}
+                <a href="{% url 'employee_print_qr' order.order_number %}" target="_blank" class="btn-c print-btn">
+                    🖨️
+                </a>
+            {% endif %}
+            <button onclick="window.updateStatus('{{ order.order_number }}', 'ready_for_delivery')" class="btn-c process-btn">
+                ✅ Ready
+            </button>
+        {% elif order.status == "ready_for_delivery" %}
+            <button onclick="window.updateStatus('{{ order.order_number }}', 'out_for_delivery')" class="btn-c process-btn">
+                🚚 Ship
+            </button>
+        {% elif order.status == "out_for_delivery" %}
+            {% if order.payment_method == "Cash on Delivery" and not order.payment_received %}
+                <button onclick="window.confirmPayment('{{ order.order_number }}')" class="btn-c pay-btn">
+                    💰 Pay
+                </button>
+            {% endif %}
+            <button onclick="window.updateStatus('{{ order.order_number }}', 'delivered')" class="btn-c process-btn">
+                ✅ Done
+            </button>
+        {% elif order.status == "delivered" %}
+            {% if order.payment_method == "Cash on Delivery" and not order.payment_received %}
+                <button onclick="window.confirmPayment('{{ order.order_number }}')" class="btn-c pay-btn">
+                    💰 Confirm
+                </button>
+            {% endif %}
+        {% endif %}
+    </div>
+</div>
+

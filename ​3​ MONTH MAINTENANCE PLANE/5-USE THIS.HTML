@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>OrderMaster Prime | Enterprise</title>
+    <!-- Fonts -->
+    <link href="https://api.fontshare.com/v2/css?f[]=satoshi@300,400,500,700,900&display=swap" rel="stylesheet">
+    <!-- Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Confetti Library -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        :root {
+            /* 
+             * THEME: ZINC DARK
+             */
+            --bg-body: #09090b;       
+            --bg-sidebar: #0f0f11;    
+            --bg-card: #141417;       
+            --bg-panel: #18181b;
+            --bg-surface: #27272a;
+            
+            --text-main: #f4f4f5;     
+            --text-muted: #a1a1aa;    
+            --text-dim: #52525b;      
+            
+            --border: #27272a;        
+            --border-hover: #3f3f46;
+
+            /* Accent Colors */
+            --primary: #6366f1;       /* Indigo */
+            --primary-glow: rgba(99, 102, 241, 0.15);
+            
+            --s-pending: #f43f5e;     /* Rose */
+            --s-preparing: #f59e0b;   /* Amber */
+            --s-ready: #10b981;       /* Emerald */
+            --s-out: #0ea5e9;         /* Sky */
+            --s-completed: #8b5cf6;   /* Violet */
+            --s-pay: #10b981;         /* Green for Pay */
+
+            --radius: 12px;
+            --header-h: 64px;
+            --sidebar-w: 260px;
+        }
+
+        /* Light Mode Variables */
+        [data-theme="light"] {
+            --bg-body: #f8fafc;
+            --bg-sidebar: #ffffff;
+            --bg-card: #ffffff;
+            --bg-panel: #f1f5f9;
+            --bg-surface: #e2e8f0;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --border-hover: #cbd5e1;
+            --primary-glow: rgba(99, 102, 241, 0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Satoshi', sans-serif; -webkit-tap-highlight-color: transparent; }
+        
+        body { background-color: var(--bg-body); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; transition: background 0.3s ease; }
+        
+        /* SIDEBAR */
+        .sidebar { width: var(--sidebar-w); background: var(--bg-sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; z-index: 50; flex-shrink: 0; }
+        @media(max-width: 1024px) { .sidebar { display: none; } }
+
+        .brand-box { height: var(--header-h); display: flex; align-items: center; padding: 0 1.5rem; gap: 10px; font-weight: 800; font-size: 1.1rem; border-bottom: 1px solid var(--border); letter-spacing: -0.03em; }
+        .nav-list { padding: 1.5rem 1rem; flex: 1; display: flex; flex-direction: column; gap: 6px; }
+        .nav-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; color: var(--text-muted); text-decoration: none; border-radius: 8px; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: 0.2s; }
+        .nav-item:hover { background: var(--bg-surface); color: var(--text-main); }
+        .nav-item.active { background: var(--primary-glow); color: var(--primary); border: 1px solid rgba(99, 102, 241, 0.2); }
+        .user-mini { padding: 1rem; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+        .avatar { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+
+        /* MAIN CONTENT */
+        .main-view { flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+
+        header { height: var(--header-h); background: var(--bg-body); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; z-index: 40; }
+        
+        .search-wrap { position: relative; width: 350px; }
+        .search-input { width: 100%; background: var(--bg-card); border: 1px solid var(--border); color: var(--text-main); padding: 9px 12px 9px 40px; border-radius: 8px; outline: none; transition: 0.2s; }
+        .search-input:focus { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary-glow); }
+        
+        .header-actions { display: flex; gap: 8px; }
+        .btn-icon { width: 38px; height: 38px; border-radius: 8px; background: var(--bg-card); border: 1px solid var(--border); color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .btn-icon:hover { border-color: var(--primary); color: var(--primary); transform: translateY(-1px); }
+        .btn-icon.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+        /* ANALYTICS */
+        .analytics-strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; padding: 1.5rem 2rem 0 2rem; }
+        .stat-box { background: var(--bg-card); border: 1px solid var(--border); padding: 16px; border-radius: 12px; display: flex; flex-direction: column; height: 90px; position: relative; overflow: hidden; }
+        .stat-val { font-size: 1.5rem; font-weight: 700; color: var(--text-main); margin-top: auto; }
+        
+        /* KANBAN BOARD */
+        .control-bar { padding: 1.5rem 2rem 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        .board-container { flex: 1; overflow-x: auto; padding: 0 2rem 2rem 2rem; display: flex; gap: 20px; align-items: flex-start; scrollbar-width: none; }
+        .column { min-width: 320px; max-width: 360px; height: 100%; display: flex; flex-direction: column; }
+        .col-header { padding: 12px 4px; display: flex; justify-content: space-between; border-bottom: 2px solid transparent; margin-bottom: 12px; color: var(--text-muted); font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        .col-body { flex: 1; overflow-y: auto; padding-right: 4px; display: flex; flex-direction: column; gap: 12px; padding-bottom: 50px; }
+        
+        /* CARD */
+        .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; cursor: pointer; position: relative; transition: all 0.2s ease; user-select: none; }
+        .card:hover { border-color: var(--border-hover); transform: translateY(-3px); box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5); }
+        .card:active { transform: scale(0.98); }
+        
+        .card-top { display: flex; justify-content: space-between; margin-bottom: 10px; }
+        .card-id { font-weight: 700; font-size: 0.9rem; color: var(--primary); }
+        
+        .c-user { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; }
+        .c-info div:first-child { font-weight: 600; font-size: 0.95rem; }
+        .tags-row { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; align-items: center; }
+        
+        .tag { font-size: 0.7rem; padding: 3px 8px; border-radius: 6px; font-weight: 600; border: 1px solid var(--border); }
+        /* Style for KHQR: Red with slightly visible border */
+        .tag.khqr { background: rgba(227, 0, 11, 0.15); color: #ef4444; border-color: rgba(227, 0, 11, 0.2); }
+        .tag.cod { background: #f59e0b20; color: #f59e0b; border-color: #f59e0b40; }
+        .tag.paid { background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
+
+        .items-stack { display: flex; align-items: center; gap: 6px; border-top: 1px solid var(--border); padding-top: 12px; justify-content: space-between; }
+        .thumb { width: 28px; height: 28px; border-radius: 6px; border: 1px solid var(--border); object-fit: cover; }
+        .price { font-weight: 800; font-size: 0.95rem; color: var(--text-main); }
+
+        /* --- CARD ACTION BUTTONS --- */
+        .card-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 14px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border);
+        }
+
+        .btn-c {
+            flex: 1;
+            padding: 8px 10px;
+            border-radius: 6px;
+            border: 1px solid transparent;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        /* --- BUTTON COLORS --- */
+        /* Neutral (Print) */
+        .btn-c.print-btn { background: var(--bg-surface); color: var(--text-muted); border-color: var(--border); }
+        .btn-c.print-btn:hover { background: var(--border); color: var(--text-main); }
+
+        /* Primary (Process) */
+        .btn-c.process-btn { background: rgba(99, 102, 241, 0.1); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.2); }
+        .btn-c.process-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
+
+        /* Success (Confirm Payment) */
+        .btn-c.pay-btn { background: rgba(16, 185, 129, 0.1); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.2); }
+        .btn-c.pay-btn:hover { background: var(--s-pay); color: white; border-color: var(--s-pay); }
+
+        /* -------------------------------------- */
+        /* === ULTRA DETAIL MODAL === */
+        /* -------------------------------------- */
+        .modal-backdrop {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px);
+            z-index: 1000; display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+        }
+        .modal-backdrop.active { opacity: 1; pointer-events: all; }
+
+        .detail-panel {
+            background: var(--bg-panel); width: 95%; max-width: 800px; max-height: 90vh;
+            border-radius: 16px; border: 1px solid var(--border); display: flex; flex-direction: column;
+            transform: scale(0.95); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+        .modal-backdrop.active .detail-panel { transform: scale(1); }
+
+        .d-header {
+            padding: 1.5rem; border-bottom: 1px solid var(--border); background: var(--bg-card); border-radius: 16px 16px 0 0;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .d-status-pill {
+            padding: 6px 12px; border-radius: 30px; font-size: 0.8rem; font-weight: 700; 
+            text-transform: uppercase; background: var(--bg-surface); margin-left: 10px;
+        }
+
+        .d-body { padding: 0; overflow-y: auto; display: flex; flex-direction: column; flex: 1; }
+        
+        /* Timeline Stepper */
+        .timeline-box { background: var(--bg-surface); padding: 1.5rem 2rem; border-bottom: 1px solid var(--border); }
+        .stepper { display: flex; justify-content: space-between; position: relative; }
+        .stepper::before {
+            content: ''; position: absolute; top: 15px; left: 10px; right: 10px; height: 2px;
+            background: var(--border); z-index: 0;
+        }
+        .step { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; flex: 1; }
+        .s-dot { 
+            width: 32px; height: 32px; background: var(--bg-card); border: 2px solid var(--text-muted); border-radius: 50%; 
+            display: flex; align-items: center; justify-content: center; transition: 0.3s;
+        }
+        .s-label { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; text-transform: uppercase; }
+        
+        .step.done .s-dot { background: var(--primary); border-color: var(--primary); color: white; }
+        .step.active .s-dot { border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-glow); background: var(--bg-card); color: var(--primary); }
+        .step.active .s-label { color: var(--primary); }
+
+        /* Detail Content Grid */
+        .d-grid { display: grid; grid-template-columns: 1fr 340px; }
+        @media(max-width: 800px) { .d-grid { grid-template-columns: 1fr; } }
+        
+        .d-col { padding: 2rem; }
+        .d-col.gray { background: rgba(0,0,0,0.02); border-left: 1px solid var(--border); }
+        @media(max-width: 800px) { .d-col.gray { border-left: none; border-top: 1px solid var(--border); } }
+
+        .info-group { margin-bottom: 1.5rem; }
+        .info-label { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; margin-bottom: 8px; }
+        .info-val { font-size: 1rem; color: var(--text-main); font-weight: 500; }
+        
+        .d-items { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .d-items td { padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+        .d-items img { width: 40px; height: 40px; border-radius: 6px; border: 1px solid var(--border); object-fit: cover; margin-right: 12px; }
+
+        .d-footer {
+            padding: 1rem 1.5rem; border-top: 1px solid var(--border); background: var(--bg-card); border-radius: 0 0 16px 16px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        
+        .btn {
+            padding: 10px 20px; border-radius: 8px; border: 1px solid transparent; font-size: 0.9rem; font-weight: 600; 
+            cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 8px;
+        }
+        .btn-ghost { background: transparent; color: var(--text-muted); border-color: var(--border); }
+        .btn-ghost:hover { border-color: var(--text-main); color: var(--text-main); }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { opacity: 0.9; box-shadow: 0 4px 12px var(--primary-glow); }
+        
+        /* Utility Helpers */
+        .show-flex { display: flex !important; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+        <div class="brand-box"><i class="fas fa-cube" style="color:var(--primary)"></i> OrderMaster</div>
+        <div class="nav-list">
+            <a class="nav-item active"><i class="fas fa-th-large"></i> Dashboard</a>
+            <a class="nav-item"><i class="fas fa-shopping-bag"></i> Orders</a>
+            <a class="nav-item"><i class="fas fa-users"></i> Clients</a>
+            <a class="nav-item"><i class="fas fa-chart-line"></i> Analytics</a>
+        </div>
+        <div class="user-mini">
+            <div class="avatar">MK</div>
+            <div>
+                <div style="font-weight: 600; font-size: 0.9rem;">Manager Ken</div>
+                <div style="font-size: 0.75rem; color: var(--text-muted);">Store Admin</div>
+            </div>
+        </div>
+    </aside>
+
+    <div class="main-view">
+        <header>
+            <div style="display:flex;align-items:center;gap:15px; font-weight:700">
+                <span>Overview</span>
+            </div>
+            <div class="search-wrap"><i class="fas fa-search" style="position:absolute; left:14px; top:12px; color:gray"></i><input type="text" class="search-input" placeholder="Search orders..."></div>
+            <div class="header-actions">
+                <button class="btn-icon active" id="demo-btn" onclick="toggleDemo()"><i class="fas fa-robot"></i></button>
+                <button class="btn-icon" onclick="toggleTheme()"><i class="far fa-moon"></i></button>
+            </div>
+        </header>
+
+        <!-- DASHBOARD STATS -->
+        <div class="analytics-strip">
+            <div class="stat-box">
+                <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:5px;">Pending Orders</div>
+                <div class="stat-val" id="val-pending">0</div>
+            </div>
+            <div class="stat-box">
+                <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:5px;">Total Revenue</div>
+                <div class="stat-val" style="color: var(--s-ready)">$<span id="val-rev">0.00</span></div>
+            </div>
+        </div>
+
+        <!-- KANBAN -->
+        <div class="control-bar"><h2 style="font-size:1.1rem; font-weight:700;">Active Orders</h2></div>
+        
+        <div class="board-container">
+            <div class="column"><div class="col-header" style="color:var(--s-pending)">Pending <span id="cnt-pending">0</span></div><div class="col-body" id="col-pending"></div></div>
+            <div class="column"><div class="col-header" style="color:var(--s-preparing)">Processing <span id="cnt-preparing">0</span></div><div class="col-body" id="col-preparing"></div></div>
+            <div class="column"><div class="col-header" style="color:var(--s-ready)">Ready <span id="cnt-ready">0</span></div><div class="col-body" id="col-ready"></div></div>
+            <div class="column"><div class="col-header" style="color:var(--s-out)">Delivering <span id="cnt-out">0</span></div><div class="col-body" id="col-out"></div></div>
+            <div class="column"><div class="col-header" style="color:var(--s-completed)">Completed <span id="cnt-completed">0</span></div><div class="col-body" id="col-completed"></div></div>
+        </div>
+    </div>
+
+    <!-- DETAIL MODAL (LIGHTBOX) -->
+    <div class="modal-backdrop" id="modal-view" onclick="closeModal(event)">
+        <div class="detail-panel">
+            <div class="d-header">
+                <div style="display:flex; align-items:center;">
+                    <h2 style="font-size:1.4rem;" id="d-id">Order #1234</h2>
+                    <span class="d-status-pill" id="d-status" style="color:white;">PENDING</span>
+                </div>
+                <button onclick="closeModal(null,true)" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:1.2rem;"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <div class="d-body">
+                <!-- Timeline -->
+                <div class="timeline-box">
+                    <div class="stepper" id="stepper-ui">
+                        <div class="step" data-step="pending"><div class="s-dot"><i class="fas fa-clipboard"></i></div><div class="s-label">Pending</div></div>
+                        <div class="step" data-step="preparing"><div class="s-dot"><i class="fas fa-box-open"></i></div><div class="s-label">Processing</div></div>
+                        <div class="step" data-step="ready"><div class="s-dot"><i class="fas fa-check"></i></div><div class="s-label">Ready</div></div>
+                        <div class="step" data-step="out"><div class="s-dot"><i class="fas fa-shipping-fast"></i></div><div class="s-label">Delivery</div></div>
+                        <div class="step" data-step="completed"><div class="s-dot"><i class="fas fa-home"></i></div><div class="s-label">Done</div></div>
+                    </div>
+                </div>
+
+                <div class="d-grid">
+                    <div class="d-col">
+                        <div class="info-group">
+                            <div class="info-label">Order Items</div>
+                            <table class="d-items">
+                                <tbody id="d-items-list">
+                                    <!-- Items Injected Here -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; margin-top:20px; padding-top:20px; border-top:1px solid var(--border);">
+                            <span style="font-size:1.1rem; font-weight:700;">Total Amount</span>
+                            <span style="font-size:1.4rem; font-weight:800; color:var(--primary);" id="d-total">$0.00</span>
+                        </div>
+                    </div>
+                    
+                    <div class="d-col gray">
+                        <div class="info-group">
+                            <div class="info-label">Customer Details</div>
+                            <div class="info-val" id="d-customer">Name</div>
+                            <div style="font-size:0.9rem; color:var(--text-muted); margin-top:4px;" id="d-phone">Phone</div>
+                        </div>
+                        <div class="info-group">
+                            <div class="info-label">Shipping Address</div>
+                            <div class="info-val" style="font-size:0.9rem; line-height:1.5;" id="d-address">Address</div>
+                        </div>
+                        <div class="info-group">
+                            <div class="info-label">Payment Method</div>
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <div id="d-pay-icon" style="width:24px; text-align:center;"></div>
+                                <span class="info-val" id="d-payment">COD</span>
+                            </div>
+                        </div>
+                        <div class="info-group">
+                            <div class="info-label">Order Date</div>
+                            <div class="info-val" style="font-size:0.9rem;" id="d-date">Jan 01, 2024</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-footer">
+                <button class="btn btn-ghost" onclick="window.print()"><i class="fas fa-print"></i> Print Invoice</button>
+                <div id="d-actions">
+                    <!-- Action Button Injected JS -->
+                    <button class="btn btn-primary">Process Order</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SAMPLE_ITEMS = [
+            { n: "Sony WH-1000XM5", p: 349.00, img: "https://placehold.co/100/101010/FFF?text=Sony" },
+            { n: "Logitech MX Master 3S", p: 99.00, img: "https://placehold.co/100/202020/FFF?text=Mouse" },
+            { n: "Keychron Q1 Pro", p: 189.00, img: "https://placehold.co/100/303030/FFF?text=KBD" },
+            { n: "Dell 27 4K Monitor", p: 450.00, img: "https://placehold.co/100/404040/FFF?text=Dell" },
+            { n: "Anker USB-C Hub", p: 55.50, img: "https://placehold.co/100/505050/FFF?text=Hub" }
+        ];
+
+        let orders = [];
+        let demoInt = null;
+
+        function init() {
+            // Seed data
+            [1,2].forEach(() => createOrder('pending'));
+            createOrder('preparing');
+            createOrder('ready');
+            renderAll();
+        }
+
+        // --- CORE FUNCTIONS ---
+        function createOrder(status='pending', isDemo=false) {
+            const id = Math.floor(Math.random() * 89999 + 10000);
+            const items = [];
+            const count = Math.ceil(Math.random() * 3);
+            let total = 0;
+            
+            for(let i=0; i<count; i++) {
+                const it = SAMPLE_ITEMS[Math.floor(Math.random()*SAMPLE_ITEMS.length)];
+                items.push(it);
+                total += it.p;
+            }
+            
+            const custs = ['Dara Sok', 'Vireak Chea', 'Bopha Chan', 'Lisa Kim', 'Tom Cruise'];
+            
+            // Generate Data
+            const order = {
+                id,
+                status,
+                cust: custs[Math.floor(Math.random()*custs.length)],
+                items,
+                total: total.toFixed(2),
+                date: new Date(),
+                // CHANGED: Use KHQR Pay instead of ABA
+                method: Math.random() > 0.4 ? 'KHQR Pay' : 'COD',
+                isPaid: false
+            };
+            
+            orders.unshift(order);
+            if(isDemo) { renderAll(); playSound(); }
+            return order;
+        }
+
+        function renderAll() {
+            // Reset Cols
+            ['pending','preparing','ready','out','completed'].forEach(k => {
+                document.getElementById('col-'+k).innerHTML = '';
+                document.getElementById('cnt-'+k).innerText = '0';
+            });
+            
+            let revenue = 0;
+            let pending = 0;
+
+            orders.forEach(o => {
+                if(o.status !== 'completed') pending++;
+                if(o.isPaid || o.status==='completed') revenue += parseFloat(o.total);
+                
+                // Update badge
+                const cnt = document.getElementById('cnt-'+o.status);
+                cnt.innerText = parseInt(cnt.innerText) + 1;
+                
+                document.getElementById('col-'+o.status).appendChild(buildCard(o));
+            });
+            
+            document.getElementById('val-pending').innerText = pending;
+            document.getElementById('val-rev').innerText = revenue.toLocaleString();
+        }
+
+        function buildCard(o) {
+            const el = document.createElement('div');
+            el.className = 'card';
+            el.onclick = () => openDetails(o.id);
+            el.draggable = true;
+            el.ondragstart = (e) => e.dataTransfer.setData('oid', o.id);
+            
+            const tagClass = o.method.includes('KHQR') ? 'khqr' : 'cod';
+            const payStatusHTML = o.isPaid ? `<span class="tag paid"><i class="fas fa-check-circle"></i> Paid</span>` : '';
+            
+            // --- LOGIC FOR MOVE BUTTON ---
+            const stages = ['pending', 'preparing', 'ready', 'out', 'completed'];
+            const curIdx = stages.indexOf(o.status);
+            const nextStatus = stages[curIdx + 1];
+            
+            let processBtnHTML = '';
+            
+            if (nextStatus) {
+               // Dynamic Button Label
+               let label = nextStatus.charAt(0).toUpperCase() + nextStatus.slice(1);
+               let icon = 'arrow-right';
+               
+               if(nextStatus === 'preparing') { label = 'Prepare'; icon = 'box'; }
+               if(nextStatus === 'ready') { label = 'Ready'; icon = 'check'; }
+               if(nextStatus === 'out') { label = 'Ship'; icon = 'shipping-fast'; }
+               if(nextStatus === 'completed') { label = 'Complete'; icon = 'check-double'; }
+               
+               processBtnHTML = `
+                <button class="btn-c process-btn" onclick="cardAction(event, 'move', ${o.id}, '${nextStatus}')">
+                    <i class="fas fa-${icon}"></i> ${label}
+                </button>`;
+            } else {
+               // Already Completed
+               processBtnHTML = ``;
+            }
+
+            // --- LOGIC FOR PAY BUTTON ---
+            // Only show Confirm Payment if NOT Paid and NOT Completed
+            let payBtnHTML = '';
+            if(!o.isPaid && o.status !== 'completed') {
+                payBtnHTML = `
+                <button class="btn-c pay-btn" onclick="cardAction(event, 'pay', ${o.id})">
+                    <i class="fas fa-dollar-sign"></i> Confirm
+                </button>`;
+            }
+            
+            el.innerHTML = `
+                <div class="card-top">
+                    <span class="card-id">#${o.id}</span>
+                    <span style="font-size:0.75rem; color:var(--text-muted)">${formatTime(o.date)}</span>
+                </div>
+                <div class="c-user">
+                    <div class="avatar" style="width:28px; height:28px; font-size:0.75rem">${getInitial(o.cust)}</div>
+                    <div>
+                        <div style="font-weight:600; font-size:0.9rem">${o.cust}</div>
+                    </div>
+                </div>
+                <div class="tags-row">
+                    <span class="tag ${tagClass}">${o.method}</span>
+                    ${payStatusHTML}
+                </div>
+                <div class="items-stack">
+                    <div style="display:flex;">
+                        ${o.items.slice(0,3).map(i=>`<img src="${i.img}" class="thumb">`).join('')}
+                        ${o.items.length>3 ? `<span style="font-size:0.8rem; margin-left:5px; color:var(--text-muted)">+${o.items.length-3}</span>` : ''}
+                    </div>
+                    <div class="price">$${o.total}</div>
+                </div>
+
+                <!-- CARD BUTTONS -->
+                <div class="card-actions">
+                    ${payBtnHTML}
+                    <button class="btn-c print-btn" onclick="cardAction(event, 'print', ${o.id})">
+                        <i class="fas fa-print"></i>
+                    </button>
+                    ${processBtnHTML}
+                </div>
+            `;
+            return el;
+        }
+
+        // --- QUICK ACTION HANDLER ---
+        function cardAction(e, type, id, nextStep) {
+            e.stopPropagation(); // Stop opening modal
+            
+            if(type === 'print') {
+                alert(`🖨️ Printing receipt for Order #${id}...`);
+            } else if (type === 'move') {
+                advanceOrder(id, nextStep);
+            } else if (type === 'pay') {
+                const o = orders.find(x => x.id === id);
+                if(o) {
+                    o.isPaid = true;
+                    // Trigger effect
+                    const el = e.target.closest('button');
+                    const rect = el.getBoundingClientRect();
+                    confetti({ particleCount: 50, spread: 50, origin: { x: rect.left/window.innerWidth, y: rect.top/window.innerHeight } });
+                    renderAll();
+                }
+            }
+        }
+
+        // --- DETAIL MODAL LOGIC ---
+        function openDetails(id) {
+            const o = orders.find(x => x.id === id);
+            if(!o) return;
+
+            document.getElementById('d-id').innerText = '#' + o.id;
+            const statusEl = document.getElementById('d-status');
+            statusEl.innerText = o.status;
+            
+            const colorMap = {
+                'pending': 'var(--s-pending)', 'preparing': 'var(--s-preparing)', 
+                'ready': 'var(--s-ready)', 'out': 'var(--s-out)', 'completed': 'var(--s-completed)'
+            };
+            statusEl.style.backgroundColor = colorMap[o.status];
+
+            document.getElementById('d-customer').innerText = o.cust;
+            document.getElementById('d-phone').innerText = '012-' + Math.floor(Math.random()*900+100) + '-XXX';
+            document.getElementById('d-address').innerText = '#'+Math.floor(Math.random()*100)+', St. Monivong, Phnom Penh';
+            document.getElementById('d-date').innerText = o.date.toLocaleString();
+            document.getElementById('d-payment').innerText = o.method + (o.isPaid ? ' (PAID)' : ' (Unpaid)');
+            document.getElementById('d-total').innerText = '$'+o.total;
+            
+            document.getElementById('d-pay-icon').innerHTML = o.method.includes('KHQR') 
+                ? '<i class="fas fa-qrcode" style="color:#e3000b"></i>' 
+                : '<i class="fas fa-money-bill-wave" style="color:#f59e0b"></i>';
+
+            const tBody = document.getElementById('d-items-list');
+            tBody.innerHTML = o.items.map(i => `
+                <tr>
+                    <td style="display:flex; align-items:center;">
+                        <img src="${i.img}">
+                        <div>
+                            <div style="font-weight:600;">${i.n}</div>
+                            <div style="font-size:0.8rem; color:var(--text-muted)">SKU: 884-292</div>
+                        </div>
+                    </td>
+                    <td style="text-align:right; font-weight:600;">$${i.p}</td>
+                </tr>
+            `).join('');
+
+            const stages = ['pending', 'preparing', 'ready', 'out', 'completed'];
+            const curIdx = stages.indexOf(o.status);
+            
+            document.querySelectorAll('.step').forEach((el, idx) => {
+                el.classList.remove('done', 'active');
+                if(idx < curIdx) el.classList.add('done');
+                if(idx === curIdx) el.classList.add('active');
+            });
+
+            const actDiv = document.getElementById('d-actions');
+            if(o.status === 'completed') {
+                actDiv.innerHTML = `<span style="color:var(--s-completed); font-weight:700; display:flex; align-items:center; gap:5px;"><i class="fas fa-check-circle"></i> Delivered</span>`;
+            } else {
+                const nextStep = stages[curIdx + 1];
+                actDiv.innerHTML = `<button class="btn btn-primary" onclick="advanceOrder(${o.id}, '${nextStep}')">Move to ${nextStep.toUpperCase()} <i class="fas fa-arrow-right"></i></button>`;
+            }
+
+            document.getElementById('modal-view').classList.add('active');
+        }
+
+        function closeModal(e, force) {
+            if(force || e.target.id === 'modal-view') {
+                document.getElementById('modal-view').classList.remove('active');
+            }
+        }
+
+        function advanceOrder(id, nextStatus) {
+            const o = orders.find(x => x.id === id);
+            if(o) {
+                o.status = nextStatus;
+                if(nextStatus === 'completed') {
+                    o.isPaid = true; // Auto pay on complete
+                    confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+                    playSound();
+                }
+                renderAll();
+                if(document.getElementById('modal-view').classList.contains('active')) {
+                     openDetails(id);
+                }
+            }
+        }
+
+        // --- UTILS ---
+        function formatTime(date) {
+            const min = Math.floor((new Date() - date)/60000);
+            return min < 1 ? 'Just now' : min + 'm ago';
+        }
+        function getInitial(n) { return n.split(' ').map(x=>x[0]).join(''); }
+        function toggleTheme() {
+            const b = document.body;
+            b.getAttribute('data-theme')==='light' ? b.removeAttribute('data-theme') : b.setAttribute('data-theme','light');
+        }
+        function toggleDemo() {
+            const btn = document.getElementById('demo-btn');
+            if(demoInt) { clearInterval(demoInt); demoInt=null; btn.classList.remove('active'); }
+            else { createOrder('pending', true); demoInt=setInterval(()=>createOrder('pending', true),4000); btn.classList.add('active'); }
+        }
+        function playSound() {
+            const ctx = new (window.AudioContext||window.webkitAudioContext)();
+            const o=ctx.createOscillator(); o.connect(ctx.destination);
+            o.frequency.setValueAtTime(440, ctx.currentTime);
+            o.start(); o.stop(ctx.currentTime+0.1);
+        }
+        
+        const cols = document.querySelectorAll('.col-body');
+        cols.forEach(c => {
+            c.ondragover = e => e.preventDefault();
+            c.ondrop = e => {
+                e.preventDefault();
+                const oid = parseInt(e.dataTransfer.getData('oid'));
+                const newStat = c.id.replace('col-', '');
+                const order = orders.find(x => x.id === oid);
+                if(order && order.status !== newStat) {
+                    order.status = newStat;
+                    renderAll();
+                    if(document.getElementById('modal-view').classList.contains('active')) openDetails(oid);
+                }
+            }
+        });
+
+        init();
+    </script>
+</body>
+</html>

@@ -260,7 +260,7 @@
                 <div class="col-body" id="col-pending">
                     {% if orders_to_prepare %}
                         {% for order in orders_to_prepare %}
-                            {% include 'app/employee_order_card_kanban.html' with order=order show_items=True %}
+                            {% include 'app/employee/components/order_card_kanban.html' with order=order show_items=True %}
                         {% endfor %}
                     {% else %}
                         <div class="empty-col"><div class="empty-icon">📭</div><div>No orders</div></div>
@@ -277,7 +277,7 @@
                 <div class="col-body" id="col-preparing">
                     {% if orders_preparing %}
                         {% for order in orders_preparing %}
-                            {% include 'app/employee_order_card_kanban.html' with order=order show_items=True %}
+                            {% include 'app/employee/components/order_card_kanban.html' with order=order show_items=True %}
                         {% endfor %}
                     {% else %}
                         <div class="empty-col"><div class="empty-icon">📭</div><div>No orders</div></div>
@@ -294,7 +294,7 @@
                 <div class="col-body" id="col-ready">
                     {% if orders_ready %}
                         {% for order in orders_ready %}
-                            {% include 'app/employee_order_card_kanban.html' with order=order %}
+                            {% include 'app/employee/components/order_card_kanban.html' with order=order %}
                         {% endfor %}
                     {% else %}
                         <div class="empty-col"><div class="empty-icon">📭</div><div>No orders</div></div>
@@ -311,7 +311,7 @@
                 <div class="col-body" id="col-out">
                     {% if orders_out %}
                         {% for order in orders_out %}
-                            {% include 'app/employee_order_card_kanban.html' with order=order %}
+                            {% include 'app/employee/components/order_card_kanban.html' with order=order %}
                         {% endfor %}
                     {% else %}
                         <div class="empty-col"><div class="empty-icon">📭</div><div>No orders</div></div>
@@ -328,7 +328,7 @@
                 <div class="col-body" id="col-delivered">
                     {% if orders_delivered_today %}
                         {% for order in orders_delivered_today %}
-                            {% include 'app/employee_order_card_kanban.html' with order=order show_items=False %}
+                            {% include 'app/employee/components/order_card_kanban.html' with order=order show_items=False %}
                         {% endfor %}
                     {% else %}
                         <div class="empty-col"><div class="empty-icon">📭</div><div>No orders</div></div>

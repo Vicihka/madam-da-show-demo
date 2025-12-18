@@ -207,13 +207,13 @@ def shop_view(request):
         'products': products,
         'hero_slides': hero_slides,
     }
-    return render(request, 'app/index.html', context)
+    return render(request, 'app/shop/index.html', context)
 
 
 @ensure_csrf_cookie
 def checkout_view(request):
     """Checkout page view"""
-    return render(request, 'app/checkout.html')
+    return render(request, 'app/shop/checkout.html')
 
 
 def order_success_view(request):
@@ -427,27 +427,27 @@ def order_success_view(request):
         'qr_code_image_url': qr_code_obj.qr_code_image.url if qr_code_obj and qr_code_obj.qr_code_image else None,
         'qr_code_expires_at': qr_code_obj.expires_at.isoformat() if qr_code_obj else None,
     }
-    return render(request, 'app/order_success.html', context)
+    return render(request, 'app/shop/order_success.html', context)
 
 
 def about_us_view(request):
     """About us page view"""
-    return render(request, 'app/about_us.html')
+    return render(request, 'app/pages/about_us.html')
 
 
 def contact_view(request):
     """Contact page view"""
-    return render(request, 'app/contact.html')
+    return render(request, 'app/pages/contact.html')
 
 
 def shipping_policy_view(request):
     """Shipping policy page view"""
-    return render(request, 'app/shipping_policy.html')
+    return render(request, 'app/pages/shipping_policy.html')
 
 
 def privacy_policy_view(request):
     """Privacy policy page view"""
-    return render(request, 'app/privacy_policy.html')
+    return render(request, 'app/pages/privacy_policy.html')
 
 
 @apply_rate_limit('20/m', 'POST')
@@ -1273,7 +1273,7 @@ def cod_confirmation_view(request, order_number=None):
             if auto_confirm or (order.payment_received_at and (timezone.now() - order.payment_received_at).total_seconds() < 5):
                 auto_confirmed = True
         
-        return render(request, 'app/cod_confirmation.html', {
+        return render(request, 'app/cod/confirmation.html', {
             'order': order,
             'order_number': order_number or '',
             'auto_confirmed': auto_confirmed
@@ -1529,7 +1529,7 @@ def cod_print_view(request, order_number):
             'qr_url': qr_url,
             'confirm_url': confirm_url,
         }
-        return render(request, 'app/cod_print.html', context)
+        return render(request, 'app/cod/print.html', context)
         
     except Order.DoesNotExist:
         return JsonResponse({'error': 'Order not found'}, status=404)
