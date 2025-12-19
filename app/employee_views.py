@@ -2,13 +2,17 @@
 Employee Dashboard Views
 Simple interface for employees to manage orders and print QR codes
 """
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
+from django.conf import settings
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
 from django.utils import timezone
 from django.db.models import Q, Prefetch
 from django.core.exceptions import ValidationError
+from django.contrib import messages
 from .models import Order, OrderItem
 import json
 import logging
@@ -16,6 +20,64 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+# ========== AUTHENTICATION HELPERS ==========
+
+def is_employee(user):
+    """Check if user is staff or in Employee group"""
+    return user.is_authenticated and (user.is_staff or user.groups.filter(name='Employee').exists())
+
+
+def employee_required(view_func):
+    """Decorator to require employee access"""
+    decorated_view = login_required(
+        user_passes_test(is_employee, login_url='employee_login')(view_func)
+    )
+    return decorated_view
+
+
+# ========== AUTHENTICATION VIEWS ==========
+
+def employee_login(request):
+    """Employee login page"""
+    if request.user.is_authenticated and is_employee(request.user):
+        return redirect('employee_dashboard')
+    
+    if request.method == 'POST':
+        username = request.POST.get('username', '').strip()
+        password = request.POST.get('password', '')
+        
+        if not username or not password:
+            messages.error(request, 'Please provide both username and password.')
+            return render(request, 'app/employee/login.html')
+        
+        user = authenticate(request, username=username, password=password)
+        
+        if user is not None:
+            # Check if user is staff or in Employee group
+            if is_employee(user):
+                login(request, user)
+                messages.success(request, f'Welcome back, {user.username}!')
+                
+                # Redirect to next URL or dashboard
+                next_url = request.GET.get('next', 'employee_dashboard')
+                return redirect(next_url)
+            else:
+                messages.error(request, 'You do not have permission to access the employee dashboard.')
+        else:
+            messages.error(request, 'Invalid username or password.')
+    
+    return render(request, 'app/employee/login.html')
+
+
+@login_required
+def employee_logout(request):
+    """Employee logout"""
+    logout(request)
+    messages.success(request, 'You have been logged out successfully.')
+    return redirect('employee_login')
+
+
+@employee_required
 @require_http_methods(["GET"])
 def employee_dashboard(request):
     """Main employee dashboard - shows orders that need action"""
@@ -87,6 +149,7 @@ def employee_dashboard(request):
     return render(request, 'app/employee/dashboard.html', context)
 
 
+@employee_required
 @require_http_methods(["GET"])
 def employee_order_detail(request, order_number):
     """View order details for employee"""
@@ -109,6 +172,7 @@ def employee_order_detail(request, order_number):
     return render(request, 'app/employee/order_detail.html', context)
 
 
+@employee_required
 @csrf_exempt
 @require_http_methods(["POST"])
 def employee_update_status(request, order_number):
@@ -221,6 +285,7 @@ def employee_update_status(request, order_number):
         }, status=500)
 
 
+@employee_required
 @require_http_methods(["GET"])
 def employee_print_qr(request, order_number):
     """Print QR code page for employee"""
@@ -276,6 +341,7 @@ def serialize_order(order):
     }
 
 
+@employee_required
 @require_http_methods(["GET"])
 def employee_dashboard_api(request):
     """API endpoint for real-time order updates"""
@@ -351,6 +417,7 @@ def employee_dashboard_api(request):
         }, status=500)
 
 
+@employee_required
 @csrf_exempt
 @require_http_methods(["POST"])
 def employee_confirm_payment(request, order_number):

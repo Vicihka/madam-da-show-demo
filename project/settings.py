@@ -292,6 +292,11 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Authentication URLs
+LOGIN_URL = 'employee_login'
+LOGIN_REDIRECT_URL = 'employee_dashboard'
+LOGOUT_REDIRECT_URL = 'employee_login'
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/

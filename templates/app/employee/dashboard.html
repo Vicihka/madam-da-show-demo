@@ -63,8 +63,11 @@
         .nav-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; color: var(--text-muted); text-decoration: none; border-radius: 8px; font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: 0.2s; }
         .nav-item:hover { background: var(--bg-surface); color: var(--text-main); }
         .nav-item.active { background: var(--primary-glow); color: var(--primary); border: 1px solid rgba(33, 150, 243, 0.2); }
-        .user-mini { padding: 1rem; border-top: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+        .user-mini { padding: 1rem; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 10px; }
+        .user-info { display: flex; align-items: center; gap: 12px; }
         .avatar { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem; }
+        .logout-btn { width: 100%; padding: 8px 12px; background: var(--bg-surface); color: var(--text-main); border: 1px solid var(--border); border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: 0.2s; text-align: center; text-decoration: none; display: block; }
+        .logout-btn:hover { background: #fee2e2; color: #dc2626; border-color: #fca5a5; }
 
         /* MAIN CONTENT */
         .main-view { flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden; }
@@ -187,11 +190,16 @@
             <a class="nav-item">📈 Analytics</a>
         </div>
         <div class="user-mini">
-            <div class="avatar">EM</div>
-            <div>
-                <div style="font-weight: 600; font-size: 0.9rem;">Employee</div>
-                <div style="font-size: 0.75rem; color: var(--text-muted);">Kitchen Staff</div>
+            <div class="user-info">
+                <div class="avatar">{{ user.username.0|upper }}{{ user.username.1|upper }}</div>
+                <div>
+                    <div style="font-weight: 600; font-size: 0.9rem;">{{ user.username }}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">
+                        {% if user.is_staff %}Admin{% else %}Employee{% endif %}
+                    </div>
+                </div>
             </div>
+            <a href="{% url 'employee_logout' %}" class="logout-btn">🚪 Logout</a>
         </div>
     </aside>
 

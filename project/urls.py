@@ -70,6 +70,10 @@ urlpatterns += i18n_patterns(
     path('track-order/', views.track_order_view, name='track_order'),
     path('api/order/track/', views.track_order_api, name='track_order_api'),
     
+    # Employee Authentication
+    path('employee/login/', employee_views.employee_login, name='employee_login'),
+    path('employee/logout/', employee_views.employee_logout, name='employee_logout'),
+    
     # Employee Dashboard
     path('employee/', employee_views.employee_dashboard, name='employee_dashboard'),
     path('employee/api/', employee_views.employee_dashboard_api, name='employee_dashboard_api'),
