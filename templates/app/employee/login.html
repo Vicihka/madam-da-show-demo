@@ -1,166 +1,294 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Employee Login - Madam DA</title>
-    <!-- Fonts -->
     <link href="https://api.fontshare.com/v2/css?f[]=satoshi@300,400,500,700,900&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary: #2196F3;
-            --primary-dark: #1976D2;
-            --primary-light: rgba(33, 150, 243, 0.1);
-            --success: #10b981;
-            --error: #ef4444;
-            --text-main: #0f172a;
-            --text-muted: #64748b;
-            --bg-body: #f8fafc;
+        :root[data-theme="light"] {
+            /* Light Mode Colors */
+            --bg-primary: #f5f7fa;
+            --bg-secondary: #ffffff;
             --bg-card: #ffffff;
-            --border: #e2e8f0;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --bg-hover: #f8f9fb;
+            --bg-gradient-start: #4f46e5;
+            --bg-gradient-end: #7c3aed;
+            
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            
+            --border-color: #e2e8f0;
+            --border-hover: #cbd5e1;
+            
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+
+        :root[data-theme="dark"] {
+            /* Dark Mode Colors */
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-card: #1e293b;
+            --bg-hover: #334155;
+            --bg-gradient-start: #6366f1;
+            --bg-gradient-end: #8b5cf6;
+            
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            
+            --border-color: #334155;
+            --border-hover: #475569;
+            
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+            
+            --primary: #6366f1;
+            --primary-hover: #818cf8;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Satoshi', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Satoshi', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         }
 
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--bg-primary);
+            color: var(--text-primary);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
-        }
-
-        .login-container {
-            width: 100%;
-            max-width: 420px;
-            background: var(--bg-card);
-            border-radius: 16px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            padding: 2rem;
+            position: relative;
             overflow: hidden;
-            animation: slideUp 0.4s ease;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .login-header {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            color: white;
-            padding: 40px 30px;
-            text-align: center;
-        }
-
-        .login-header h1 {
-            font-size: 1.75rem;
-            font-weight: 700;
-            margin-bottom: 8px;
-            letter-spacing: -0.02em;
-        }
-
-        .login-header p {
-            font-size: 0.95rem;
-            opacity: 0.9;
-        }
-
-        .login-icon {
-            width: 60px;
-            height: 60px;
-            background: rgba(255, 255, 255, 0.2);
+        /* Animated Background */
+        .bg-decoration {
+            position: absolute;
             border-radius: 50%;
+            opacity: 0.1;
+            animation: float 20s ease-in-out infinite;
+        }
+
+        .bg-decoration-1 {
+            width: 400px;
+            height: 400px;
+            background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+            top: -200px;
+            right: -200px;
+            animation-delay: 0s;
+        }
+
+        .bg-decoration-2 {
+            width: 300px;
+            height: 300px;
+            background: linear-gradient(135deg, var(--bg-gradient-end), var(--bg-gradient-start));
+            bottom: -150px;
+            left: -150px;
+            animation-delay: 5s;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translate(0, 0) rotate(0deg);
+            }
+            33% {
+                transform: translate(30px, -30px) rotate(120deg);
+            }
+            66% {
+                transform: translate(-20px, 20px) rotate(240deg);
+            }
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            width: 50px;
+            height: 50px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 20px;
-            font-size: 2rem;
+            cursor: pointer;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+            z-index: 10;
+            box-shadow: var(--shadow-md);
         }
 
-        .login-body {
-            padding: 30px;
+        .theme-toggle:hover {
+            transform: scale(1.05);
+            border-color: var(--primary);
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* Login Container */
+        .login-container {
+            width: 100%;
+            max-width: 480px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 3rem;
+            box-shadow: var(--shadow-xl);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .login-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, var(--bg-gradient-start), var(--bg-gradient-end));
+        }
+
+        /* Logo Section */
+        .logo-section {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .logo-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 2.5rem;
+            box-shadow: var(--shadow-lg);
+            animation: bounce 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .logo-title {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .logo-subtitle {
+            font-size: 1rem;
+            color: var(--text-secondary);
+        }
+
+        /* Form */
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
         }
 
         .form-group {
-            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
         }
 
         .form-label {
-            display: block;
-            font-size: 0.875rem;
+            font-size: 0.9rem;
             font-weight: 600;
-            color: var(--text-main);
-            margin-bottom: 8px;
+            color: var(--text-primary);
+            margin-left: 4px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            transition: all 0.2s ease;
         }
 
         .form-input {
             width: 100%;
-            padding: 12px 16px;
-            border: 2px solid var(--border);
-            border-radius: 10px;
-            font-size: 0.95rem;
-            color: var(--text-main);
-            transition: all 0.2s;
+            padding: 14px 16px 14px 48px;
+            background: var(--bg-hover);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 1rem;
             outline: none;
-            background: white;
+            transition: all 0.3s ease;
         }
 
         .form-input:focus {
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px var(--primary-light);
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+            background: var(--bg-secondary);
+        }
+
+        .form-input:focus + .input-icon {
+            color: var(--primary);
         }
 
         .form-input::placeholder {
-            color: #94a3b8;
+            color: var(--text-muted);
         }
 
-        .btn-login {
-            width: 100%;
-            padding: 14px 20px;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            margin-top: 10px;
-        }
-
-        .btn-login:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(33, 150, 243, 0.3);
-        }
-
-        .btn-login:active {
-            transform: translateY(0);
-        }
-
+        /* Alert Messages */
         .alert {
-            padding: 12px 16px;
-            border-radius: 10px;
-            margin-bottom: 20px;
+            padding: 1rem 1.25rem;
+            border-radius: 12px;
             font-size: 0.9rem;
+            font-weight: 500;
             display: flex;
             align-items: center;
-            gap: 10px;
-            animation: slideDown 0.3s ease;
+            gap: 12px;
+            animation: slideIn 0.3s ease;
         }
 
-        @keyframes slideDown {
+        @keyframes slideIn {
             from {
                 opacity: 0;
                 transform: translateY(-10px);
@@ -174,80 +302,185 @@
         .alert-error {
             background: #fee2e2;
             color: #991b1b;
-            border: 1px solid #fecaca;
+            border: 1px solid #fca5a5;
+        }
+
+        [data-theme="dark"] .alert-error {
+            background: rgba(239, 68, 68, 0.1);
+            color: #fca5a5;
+            border: 1px solid rgba(239, 68, 68, 0.3);
         }
 
         .alert-success {
             background: #d1fae5;
             color: #065f46;
-            border: 1px solid #a7f3d0;
+            border: 1px solid #6ee7b7;
+        }
+
+        [data-theme="dark"] .alert-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: #6ee7b7;
+            border: 1px solid rgba(16, 185, 129, 0.3);
         }
 
         .alert-icon {
-            font-size: 1.2rem;
+            font-size: 1.3rem;
+            flex-shrink: 0;
         }
 
+        /* Submit Button */
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-end));
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-md);
+            margin-top: 0.5rem;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Footer */
         .login-footer {
-            padding: 20px 30px;
-            background: var(--bg-body);
+            margin-top: 2rem;
             text-align: center;
-            font-size: 0.85rem;
-            color: var(--text-muted);
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-color);
         }
 
-        .login-footer a {
+        .footer-text {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-link {
             color: var(--primary);
             text-decoration: none;
             font-weight: 600;
+            transition: all 0.2s ease;
         }
 
-        .login-footer a:hover {
+        .footer-link:hover {
+            color: var(--primary-hover);
             text-decoration: underline;
         }
 
-        .remember-me {
+        /* Security Badge */
+        .security-badge {
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 8px;
-            margin-top: 16px;
+            padding: 12px;
+            background: var(--bg-hover);
+            border-radius: 10px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 1.5rem;
         }
 
-        .remember-me input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
+        .security-icon {
+            color: var(--success);
+            font-size: 1.1rem;
         }
 
-        .remember-me label {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-            cursor: pointer;
-        }
-
-        @media (max-width: 480px) {
-            .login-container {
-                border-radius: 0;
+        /* Responsive */
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
             }
 
-            .login-header {
-                padding: 30px 20px;
+            .login-card {
+                padding: 2rem 1.5rem;
             }
 
-            .login-body {
-                padding: 20px;
+            .logo-title {
+                font-size: 1.5rem;
+            }
+
+            .theme-toggle {
+                top: 1rem;
+                right: 1rem;
+                width: 44px;
+                height: 44px;
+                font-size: 1.2rem;
+            }
+
+            .bg-decoration-1 {
+                width: 250px;
+                height: 250px;
+                top: -125px;
+                right: -125px;
+            }
+
+            .bg-decoration-2 {
+                width: 200px;
+                height: 200px;
+                bottom: -100px;
+                left: -100px;
+            }
+        }
+
+        /* Loading Animation */
+        .loading-text::after {
+            content: '...';
+            animation: dots 1.5s steps(3, end) infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% {
+                content: '.';
+            }
+            40% {
+                content: '..';
+            }
+            60%, 100% {
+                content: '...';
             }
         }
     </style>
 </head>
 <body>
-    <div class="login-container">
-        <div class="login-header">
-            <div class="login-icon">🛡️</div>
-            <h1>Employee Login</h1>
-            <p>Access the order management dashboard</p>
-        </div>
+    <!-- Background Decorations -->
+    <div class="bg-decoration bg-decoration-1"></div>
+    <div class="bg-decoration bg-decoration-2"></div>
 
-        <div class="login-body">
+    <!-- Theme Toggle -->
+    <button class="theme-toggle" id="themeToggle" title="Toggle Theme">
+        <span id="themeIcon">🌙</span>
+    </button>
+
+    <!-- Login Container -->
+    <div class="login-container">
+        <div class="login-card">
+            <!-- Logo Section -->
+            <div class="logo-section">
+                <div class="logo-icon">🛍️</div>
+                <h1 class="logo-title">Employee Login</h1>
+                <p class="logo-subtitle">Access your dashboard</p>
+            </div>
+
+            <!-- Alert Messages -->
             {% if messages %}
                 {% for message in messages %}
                     <div class="alert alert-{{ message.tags }}">
@@ -259,66 +492,139 @@
                 {% endfor %}
             {% endif %}
 
-            <form method="post" action="{% url 'employee_login' %}">
+            <!-- Login Form -->
+            <form method="post" action="{% url 'employee_login' %}" class="login-form" id="loginForm">
                 {% csrf_token %}
 
                 <div class="form-group">
                     <label for="username" class="form-label">Username</label>
-                    <input
-                        type="text"
-                        id="username"
-                        name="username"
-                        class="form-input"
-                        placeholder="Enter your username"
-                        required
-                        autofocus
-                    >
+                    <div class="input-wrapper">
+                        <input
+                            type="text"
+                            id="username"
+                            name="username"
+                            class="form-input"
+                            placeholder="Enter your username"
+                            required
+                            autofocus
+                        >
+                        <span class="input-icon">👤</span>
+                    </div>
                 </div>
 
                 <div class="form-group">
                     <label for="password" class="form-label">Password</label>
-                    <input
-                        type="password"
-                        id="password"
-                        name="password"
-                        class="form-input"
-                        placeholder="Enter your password"
-                        required
-                    >
+                    <div class="input-wrapper">
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            class="form-input"
+                            placeholder="Enter your password"
+                            required
+                        >
+                        <span class="input-icon">🔒</span>
+                    </div>
                 </div>
 
-                <button type="submit" class="btn-login">
-                    Sign In
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    <span id="btnText">Sign In</span>
                 </button>
-            </form>
-        </div>
 
-        <div class="login-footer">
-            <p>© 2025 Madam DA. All rights reserved.</p>
-            <p style="margin-top: 8px;">
-                Need help? Contact your administrator.
-            </p>
+                <div class="security-badge">
+                    <span class="security-icon">🔐</span>
+                    <span>Secure encrypted connection</span>
+                </div>
+            </form>
+
+            <!-- Footer -->
+            <div class="login-footer">
+                <p class="footer-text">© 2025 Madam DA. All rights reserved.</p>
+                <p class="footer-text" style="margin-top: 0.5rem;">
+                    Need help? <a href="#" class="footer-link">Contact Administrator</a>
+                </p>
+            </div>
         </div>
     </div>
 
     <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const html = document.documentElement;
+
+        // Load saved theme or default to light
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        html.setAttribute('data-theme', savedTheme);
+        updateThemeIcon(savedTheme);
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+        });
+
+        function updateThemeIcon(theme) {
+            themeIcon.textContent = theme === 'light' ? '🌙' : '☀️';
+        }
+
         // Auto-hide alerts after 5 seconds
         setTimeout(() => {
             const alerts = document.querySelectorAll('.alert');
             alerts.forEach(alert => {
-                alert.style.animation = 'slideUp 0.3s ease reverse';
-                setTimeout(() => alert.remove(), 300);
+                alert.style.animation = 'slideIn 0.3s ease reverse';
+                setTimeout(() => {
+                    alert.style.display = 'none';
+                }, 300);
             });
         }, 5000);
 
-        // Form validation feedback
-        const form = document.querySelector('form');
-        form.addEventListener('submit', (e) => {
-            const button = form.querySelector('.btn-login');
-            button.textContent = 'Signing in...';
-            button.disabled = true;
+        // Form submission handling
+        const loginForm = document.getElementById('loginForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const btnText = document.getElementById('btnText');
+
+        loginForm.addEventListener('submit', (e) => {
+            submitBtn.disabled = true;
+            btnText.innerHTML = '<span class="loading-text">Signing in</span>';
+        });
+
+        // Input focus effects
+        const formInputs = document.querySelectorAll('.form-input');
+        formInputs.forEach(input => {
+            input.addEventListener('focus', () => {
+                input.parentElement.classList.add('focused');
+            });
+            
+            input.addEventListener('blur', () => {
+                input.parentElement.classList.remove('focused');
+            });
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Alt + T to toggle theme
+            if (e.altKey && e.key === 't') {
+                themeToggle.click();
+            }
+        });
+
+        // Add floating animation to alerts
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach((alert, index) => {
+            setTimeout(() => {
+                alert.style.opacity = '0';
+                alert.style.transform = 'translateY(-10px)';
+                setTimeout(() => {
+                    alert.style.transition = 'all 0.3s ease';
+                    alert.style.opacity = '1';
+                    alert.style.transform = 'translateY(0)';
+                }, 50);
+            }, index * 100);
         });
     </script>
 </body>
 </html>
-
