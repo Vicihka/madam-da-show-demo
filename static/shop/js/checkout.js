@@ -822,6 +822,19 @@
             const telegramToggle = document.getElementById('telegram-toggle');
             const notifyViaTelegram = telegramToggle ? (telegramToggle.getAttribute('data-state') === 'checked') : true;
             
+            // Validate required fields before sending
+            if (!name || !phone || !address || !province) {
+                const missing = [];
+                if (!name) missing.push('Name');
+                if (!phone) missing.push('Phone');
+                if (!address) missing.push('Address');
+                if (!province) missing.push('Province');
+                const errorMsg = `Please fill in all required fields: ${missing.join(', ')}`;
+                console.error('COD validation failed:', errorMsg);
+                showToast(errorMsg, 'error', 5000);
+                throw new Error(errorMsg);
+            }
+            
             const orderData = {
                 name: name,
                 phone: phone,
@@ -835,6 +848,8 @@
                 discount: discountAmount.toFixed(2),
                 items: cart
             };
+            
+            console.log('Sending COD order data:', orderData); // Debug log
             
             try {
                 const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
