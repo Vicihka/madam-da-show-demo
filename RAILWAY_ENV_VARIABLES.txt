@@ -1,0 +1,72 @@
+==============================================
+RAILWAY ENVIRONMENT VARIABLES
+Copy and paste these into Railway Variables tab
+==============================================
+
+REQUIRED VARIABLES (Copy All):
+------------------------------
+
+SECRET_KEY=w0u!)5s5bjdae_5hqg=i14$7i(i)&(-owq)rdedi7q1f+_!90=
+
+DEBUG=False
+
+ALLOWED_HOSTS=*.railway.app
+
+CSRF_TRUSTED_ORIGINS=https://*.railway.app
+
+ENABLE_SSL_REDIRECT=True
+
+BAKONG_ID=vicheka_yeun@wing
+
+BAKONG_MERCHANT_NAME=MADAM DA
+
+BAKONG_API_BASE=https://bakongapi.com
+
+
+==============================================
+AFTER YOU GET YOUR RAILWAY URL, UPDATE THESE:
+==============================================
+
+Replace "your-app" with your actual Railway domain:
+
+ALLOWED_HOSTS=your-app.up.railway.app,*.railway.app
+
+CSRF_TRUSTED_ORIGINS=https://your-app.up.railway.app
+
+
+==============================================
+OPTIONAL VARIABLES (If you use these features):
+==============================================
+
+TELEGRAM_BOT_TOKEN=your-telegram-bot-token
+
+TELEGRAM_CHAT_ID=your-telegram-chat-id
+
+ADMIN_URL=secure-admin/
+
+
+==============================================
+AUTO-SET BY RAILWAY (Don't add these):
+==============================================
+
+DATABASE_URL (automatically set by PostgreSQL service)
+REDIS_URL (automatically set by Redis service)
+PORT (automatically set by Railway)
+
+
+==============================================
+NOTES:
+==============================================
+
+1. Add variables in Railway: 
+   Your Service → Variables tab → Add Variable
+
+2. Each variable is on a separate line:
+   Variable Name = Variable Value
+
+3. After adding all variables, click "Deploy"
+
+4. Check logs: Deployments → View Logs
+
+==============================================
+
