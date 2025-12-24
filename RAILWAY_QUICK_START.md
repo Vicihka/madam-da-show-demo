@@ -43,6 +43,11 @@ DEBUG=False
 ALLOWED_HOSTS=*.railway.app
 CSRF_TRUSTED_ORIGINS=https://*.railway.app
 ENABLE_SSL_REDIRECT=True
+
+# Bakong Payment (Required for payment processing)
+BAKONG_ID=vicheka_yeun@wing
+BAKONG_MERCHANT_NAME=MADAM DA
+BAKONG_API_BASE=https://bakongapi.com
 ```
 
 **Generate SECRET_KEY:**
@@ -133,6 +138,9 @@ Your project already has:
 - [ ] `SECRET_KEY` (generate new one!)
 - [ ] `DEBUG=False`
 - [ ] `ALLOWED_HOSTS=*.railway.app` (update with your domain after deploy)
+- [ ] `BAKONG_ID=vicheka_yeun@wing` (required for payment processing)
+- [ ] `BAKONG_MERCHANT_NAME=MADAM DA`
+- [ ] `BAKONG_API_BASE=https://bakongapi.com`
 
 **Auto-set by Railway (don't override):**
 - ✅ `DATABASE_URL` (from PostgreSQL service)
@@ -142,7 +150,6 @@ Your project already has:
 **Optional:**
 - `TELEGRAM_BOT_TOKEN` (if using Telegram)
 - `TELEGRAM_CHAT_ID` (if using Telegram)
-- `BAKONG_ID` (if using Bakong payments)
 
 ---
 

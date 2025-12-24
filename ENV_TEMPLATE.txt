@@ -23,8 +23,8 @@ REDIS_URL=redis://127.0.0.1:6379/1
 TELEGRAM_BOT_TOKEN=your-telegram-bot-token-here
 TELEGRAM_CHAT_ID=your-telegram-chat-id-here
 
-# Bakong Payment (Optional)
-BAKONG_ID=your-bakong-account-id
+# Bakong Payment (Required for payment processing)
+BAKONG_ID=vicheka_yeun@wing
 BAKONG_MERCHANT_NAME=MADAM DA
 BAKONG_API_BASE=https://bakongapi.com
 

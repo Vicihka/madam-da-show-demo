@@ -72,17 +72,21 @@ CSRF_TRUSTED_ORIGINS=https://*.railway.app,https://your-custom-domain.com
 ENABLE_SSL_REDIRECT=True
 ```
 
+#### Required for Payment Processing:
+
+```env
+# Bakong Payment (Required for payment processing)
+BAKONG_ID=vicheka_yeun@wing
+BAKONG_MERCHANT_NAME=MADAM DA
+BAKONG_API_BASE=https://bakongapi.com
+```
+
 #### Optional Variables (if you use these features):
 
 ```env
 # Telegram Bot (if you use it)
 TELEGRAM_BOT_TOKEN=your-telegram-bot-token
 TELEGRAM_CHAT_ID=your-telegram-chat-id
-
-# Bakong Payment (if you use it)
-BAKONG_ID=your-bakong-id
-BAKONG_MERCHANT_NAME=MADAM DA
-BAKONG_API_BASE=https://bakongapi.com
 
 # CORS (if you have a frontend)
 CORS_ALLOWED_ORIGINS=https://your-frontend-domain.com
@@ -279,9 +283,12 @@ Before showing to client:
 - [ ] `SECRET_KEY` is set and secure
 - [ ] `ALLOWED_HOSTS` includes your Railway domain
 - [ ] `CSRF_TRUSTED_ORIGINS` includes your Railway domain
+- [ ] `BAKONG_ID=vicheka_yeun@wing` is set (required for payments)
+- [ ] `BAKONG_MERCHANT_NAME=MADAM DA` is set
 - [ ] Admin URL is changed (if needed)
 - [ ] Strong admin password set
 - [ ] HTTPS is enabled (Railway does this automatically)
+- [ ] Test payment flow with Bakong
 
 ---
 
@@ -331,6 +338,8 @@ After deployment:
 - [ ] Static files loading (CSS, JS, images)
 - [ ] Database working (can create/view data)
 - [ ] Forms submitting correctly
+- [ ] Bakong payment QR code generates correctly
+- [ ] Payment status check works
 - [ ] No errors in logs
 - [ ] Test on mobile device (if needed)
 
