@@ -678,6 +678,14 @@ def create_khqr(request):
         merchant_name = request.GET.get('merchantname', BAKONG_MERCHANT_NAME)
         currency = request.GET.get('currency', 'USD')
         
+        # Validate Bakong ID
+        if not bakong_id or bakong_id.strip() == '':
+            return JsonResponse({
+                'error': True,
+                'message': 'Bakong ID is not configured. Please set BAKONG_ID in environment variables.',
+                'code': 'BAKONG_ID_MISSING'
+            }, status=400)
+        
         # Validate currency
         if currency not in ['USD', 'KHR']:
             currency = 'USD'
@@ -965,10 +973,55 @@ def create_order_on_payment(request):
         
         # Get or create customer
         try:
-            customer, _ = Customer.objects.get_or_create(
-                phone=phone,
-                defaults={'name': name, 'address': address, 'province': province}
-            )
+            # First try to get existing customer by phone
+            customer = Customer.objects.filter(phone=phone).first()
+            
+            if not customer:
+                # Customer doesn't exist, create new one
+                # Handle potential referral code collision
+                max_retries = 5
+                for attempt in range(max_retries):
+                    try:
+                        customer = Customer.objects.create(
+                            name=name,
+                            phone=phone,
+                            address=address,
+                            province=province
+                        )
+                        break
+                    except IntegrityError as e:
+                        if 'referral_code' in str(e) and attempt < max_retries - 1:
+                            # Referral code collision - try again with a different code
+                            # Generate a random suffix
+                            import random
+                            import string
+                            suffix = ''.join(random.choices(string.digits, k=3))
+                            # Try creating with explicit referral code
+                            try:
+                                customer = Customer(
+                                    name=name,
+                                    phone=phone,
+                                    address=address,
+                                    province=province,
+                                    referral_code=f"MD{phone[-6:]}{suffix}"
+                                )
+                                customer.save()
+                                break
+                            except IntegrityError:
+                                continue
+                        else:
+                            raise
+                else:
+                    # All retries failed
+                    raise IntegrityError("Could not generate unique referral code")
+            else:
+                # Customer exists, update details if needed
+                if customer.name != name or customer.address != address or customer.province != province:
+                    customer.name = name
+                    customer.address = address
+                    customer.province = province
+                    customer.save()
+                    
         except IntegrityError as e:
             logger.error(f"Database error creating/updating customer: {e}", exc_info=True)
             context = {'endpoint': 'create_order_on_payment', 'phone': phone}
