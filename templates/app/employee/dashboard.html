@@ -889,6 +889,20 @@
                     <span style="font-size: 0.85rem; color: var(--text-muted);">vs last week</span>
                 </div>
             </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-info">
+                        <h3>Completed</h3>
+                        <div class="stat-value">{{ total_completed }}</div>
+                    </div>
+                    <div class="stat-icon" style="background: rgba(139, 92, 246, 0.1); color: #8b5cf6;">✅</div>
+                </div>
+                <div class="stat-footer">
+                    <span class="stat-change positive">+20%</span>
+                    <span style="font-size: 0.85rem; color: var(--text-muted);">vs last week</span>
+                </div>
+            </div>
         </section>
 
         <!-- Orders Section -->
@@ -1035,6 +1049,39 @@
                         </div>
                         {% empty %}
                         <p style="text-align: center; color: var(--text-muted); padding: 2rem;">No orders out for delivery</p>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Completed Column -->
+                <div class="kanban-column">
+                    <div class="column-header">
+                        <span class="column-title">
+                            ✅ Completed
+                        </span>
+                        <span class="column-count">{{ total_completed }}</span>
+                    </div>
+                    <div class="column-body">
+                        {% for order in orders_completed %}
+                        <div class="order-card" style="opacity: 0.8;">
+                            <div class="order-header">
+                                <div>
+                                    <div class="order-number">#{{ order.order_number }}</div>
+                                    <div class="order-time">{{ order.updated_at|timesince }} ago</div>
+                                </div>
+                            </div>
+                            <div class="order-customer">👤 {{ order.customer_name }}</div>
+                            <div class="order-total">${{ order.total }}</div>
+                            <div class="order-items">{{ order.items.count }} item(s)</div>
+                            <span class="payment-badge {% if order.payment_method == 'Cash on Delivery' %}cod{% else %}khqr{% endif %}">
+                                {{ order.payment_method }}
+                            </span>
+                            <div class="order-footer">
+                                <button class="order-action-btn" onclick="viewOrder('{{ order.order_number }}')">View Details</button>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <p style="text-align: center; color: var(--text-muted); padding: 2rem;">No completed orders</p>
                         {% endfor %}
                     </div>
                 </div>

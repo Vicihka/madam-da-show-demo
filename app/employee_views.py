@@ -140,10 +140,12 @@ def employee_dashboard(request):
         'orders_ready': orders_ready,
         'orders_out': orders_out,
         'orders_delivered_today': orders_delivered_today,
+        'orders_completed': orders_delivered_today,  # Alias for template
         'total_to_prepare': orders_to_prepare.count(),
         'total_preparing': orders_preparing.count(),
         'total_ready': orders_ready.count(),
         'total_out': orders_out.count(),
+        'total_completed': orders_delivered_today.count(),
     }
     
     return render(request, 'app/employee/dashboard.html', context)
